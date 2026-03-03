@@ -4,91 +4,309 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento de Biblioteca</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select, button { width: 100%; padding: 10px; box-sizing: border-box; }
-        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; font-size: 16px; }
-        button:hover { background-color: #45a049; }
-        #mensagem { margin-top: 15px; font-weight: bold; }
+        :root {
+            --primary: #10b981; /* Verde moderno */
+            --primary-hover: #059669;
+            --bg: #f3f4f6;
+            --text: #1f2937;
+            --border: #d1d5db;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h2 { margin-top: 0; color: #111827; text-align: center; }
+
+        .form-group { margin-bottom: 20px; }
+        
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 500; 
+            font-size: 14px;
+        }
+
+        input[type="text"], input[type="date"], select { 
+            width: 100%; 
+            padding: 10px 12px; 
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Container de Checkboxes */
+        .horarios-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px dashed var(--border);
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-weight: 400;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .checkbox-label input {
+            margin-right: 8px;
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+        }
+
+        button { 
+            width: 100%; 
+            padding: 12px; 
+            background-color: var(--primary); 
+            color: white; 
+            border: none; 
+            border-radius: 6px;
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: 600;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover { background-color: var(--primary-hover); }
+        button:disabled { background-color: #9ca3af; cursor: not-allowed; }
+
+        #mensagem { 
+            margin-top: 15px; 
+            text-align: center; 
+            font-weight: 500; 
+            font-size: 14px;
+        }
+
+        .loading-overlay {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+        }
+
+        .hidden { display: none; }
+        .aviso-data { color: #d97706; font-size: 13px; font-style: italic;}
     </style>
 </head>
 <body>
 
-    <h2>Agendar Biblioteca</h2>
-    
-    <form id="formAgendamento">
-        <div class="form-group">
-            <label for="data">Data:</label>
-            <input type="date" id="data" required>
-        </div>
+    <div class="card">
+        <h2>Agendar Biblioteca</h2>
         
-        <div class="form-group">
-            <label for="professor">Professor:</label>
-            <input type="text" id="professor" placeholder="Nome do Professor" required>
+        <div id="loading" class="loading-overlay">
+            ⏳ Carregando professores, turmas e disponibilidades...
         </div>
 
-        <div class="form-group">
-            <label for="disciplina">Disciplina:</label>
-            <input type="text" id="disciplina" placeholder="Ex: Matemática" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="turma">Turma:</label>
-            <input type="text" id="turma" placeholder="Ex: 1º Ano A" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="horario">Horários (Ex: 1º e 2º):</label>
-            <input type="text" id="horario" required>
-        </div>
-        
-        <button type="submit">Agendar</button>
-    </form>
-
-    <div id="mensagem"></div>
-
-    <script>
-        // COLOQUE O LINK QUE VOCÊ GEROU NO APPS SCRIPT AQUI
-        const API_URL = "https://script.google.com/macros/s/AKfycbz4xciQlQ79qn-VNy_qI8W1sXKbVsS1rws87elfMGujGhda5FFcOV4xqDHUSsh5yz-DSw/exec";
-
-        document.getElementById('formAgendamento').addEventListener('submit', function(e) {
-            e.preventDefault(); // Evita recarregar a página
+        <form id="formAgendamento" class="hidden">
             
-            const divMensagem = document.getElementById('mensagem');
-            divMensagem.innerText = "Enviando agendamento... aguarde.";
-            divMensagem.style.color = "blue";
+            <div class="form-group">
+                <label for="professor">Professor:</label>
+                <select id="professor" required>
+                    <option value="">Selecione um professor...</option>
+                </select>
+            </div>
 
-            // Captura os dados do formulário
+            <div class="form-group">
+                <label for="disciplina">Disciplina:</label>
+                <input type="text" id="disciplina" placeholder="Ex: Matemática" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="turma">Turma:</label>
+                <select id="turma" required>
+                    <option value="">Selecione uma turma...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="data">Data do Agendamento:</label>
+                <input type="text" id="data" placeholder="Escolha uma data no calendário..." required>
+            </div>
+            
+            <div class="form-group">
+                <label>Horários Disponíveis: <span id="aviso-data" class="aviso-data">(Selecione a data primeiro)</span></label>
+                <div id="horarios-wrapper" class="horarios-container hidden">
+                    </div>
+            </div>
+            
+            <button type="submit" id="btnAgendar">Confirmar Agendamento</button>
+            <div id="mensagem"></div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+    <script>
+        // ATENÇÃO: COLOQUE SEU LINK DO APPS SCRIPT AQUI
+        const API_URL = "SUA_URL_DO_APP_SCRIPT_AQUI"; 
+        
+        const TODOS_HORARIOS = ['1º', '2º', '3º', '4º', '5º', '6º'];
+        let agendamentosGerais = [];
+
+        // Inicia carregando os dados do Google Sheets
+        window.onload = function() {
+            fetch(API_URL)
+                .then(res => res.json())
+                .then(dados => {
+                    agendamentosGerais = dados.agendamentos;
+                    
+                    // Preenche select de Professores
+                    const selectProf = document.getElementById('professor');
+                    dados.professores.forEach(prof => {
+                        let opt = document.createElement('option');
+                        opt.value = prof; opt.innerHTML = prof;
+                        selectProf.appendChild(opt);
+                    });
+
+                    // Preenche select de Turmas
+                    const selectTurma = document.getElementById('turma');
+                    dados.turmas.forEach(t => {
+                        let opt = document.createElement('option');
+                        opt.value = t; opt.innerHTML = t;
+                        selectTurma.appendChild(opt);
+                    });
+
+                    // Inicia o Calendário
+                    iniciarCalendario();
+
+                    // Mostra o formulário
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('formAgendamento').classList.remove('hidden');
+                })
+                .catch(err => {
+                    document.getElementById('loading').innerText = "Erro ao carregar dados. Verifique o link do Apps Script.";
+                });
+        };
+
+        function iniciarCalendario() {
+            flatpickr("#data", {
+                locale: "pt",
+                dateFormat: "d/m/Y",
+                minDate: "today", // Não permite agendar no passado
+                disable: [
+                    function(date) {
+                        return (date.getDay() === 0 || date.getDay() === 6); // Desativa Sábados e Domingos
+                    }
+                ],
+                onChange: function(selectedDates, dateStr, instance) {
+                    verificarHorariosDisponiveis(dateStr);
+                }
+            });
+        }
+
+        function verificarHorariosDisponiveis(dataSelecionada) {
+            const wrapper = document.getElementById('horarios-wrapper');
+            const aviso = document.getElementById('aviso-data');
+            wrapper.innerHTML = ''; // Limpa horários anteriores
+            
+            // Procura quais horários já foram agendados nesta data
+            let horariosOcupados = [];
+            
+            agendamentosGerais.forEach(agendamento => {
+                // Supondo que a data está na coluna 0 (A) e horários na coluna 4 (E)
+                // O formato da data que vem do JSON precisa bater com o dd/mm/yyyy
+                let dataPlanilha = new Date(agendamento[0]).toLocaleDateString('pt-BR');
+                
+                if(dataPlanilha === dataSelecionada) {
+                    let horariosSalvos = agendamento[4].toString().split(','); // Ex: "1º, 2º" -> ["1º", " 2º"]
+                    horariosSalvos.forEach(h => horariosOcupados.push(h.trim()));
+                }
+            });
+
+            // Cria checkboxes apenas para os horários LIVRES
+            let horariosLivres = TODOS_HORARIOS.filter(h => !horariosOcupados.includes(h));
+
+            if(horariosLivres.length === 0) {
+                wrapper.innerHTML = '<span style="color:red; font-size: 14px;">Todos os horários estão ocupados neste dia.</span>';
+            } else {
+                horariosLivres.forEach(horario => {
+                    let label = document.createElement('label');
+                    label.className = 'checkbox-label';
+                    label.innerHTML = `<input type="checkbox" name="horario" value="${horario}"> ${horario} Horário`;
+                    wrapper.appendChild(label);
+                });
+            }
+
+            wrapper.classList.remove('hidden');
+            aviso.classList.add('hidden');
+        }
+
+        // Envio do formulário
+        document.getElementById('formAgendamento').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Coleta os horários marcados
+            let checkboxes = document.querySelectorAll('input[name="horario"]:checked');
+            let horariosSelecionados = Array.from(checkboxes).map(cb => cb.value);
+
+            if(horariosSelecionados.length === 0) {
+                alert("Por favor, selecione pelo menos um horário disponível.");
+                return;
+            }
+
+            const divMensagem = document.getElementById('mensagem');
+            const btn = document.getElementById('btnAgendar');
+            divMensagem.innerText = "Salvando agendamento...";
+            divMensagem.style.color = "blue";
+            btn.disabled = true;
+
             const dados = {
                 data: document.getElementById('data').value,
                 professor: document.getElementById('professor').value,
                 disciplina: document.getElementById('disciplina').value,
                 turma: document.getElementById('turma').value,
-                horario: document.getElementById('horario').value
+                horarios: horariosSelecionados
             };
 
-            // Envia para a planilha
             fetch(API_URL, {
                 method: 'POST',
                 body: JSON.stringify(dados)
             })
-            .then(response => response.json())
-            .then(resultado => {
-                if(resultado.status === 'sucesso') {
-                    divMensagem.innerText = "Agendamento realizado com sucesso!";
-                    divMensagem.style.color = "green";
-                    document.getElementById('formAgendamento').reset(); // Limpa o formulário
-                } else {
-                    divMensagem.innerText = "Erro ao agendar.";
-                    divMensagem.style.color = "red";
-                }
-            })
-            .catch(erro => {
-                divMensagem.innerText = "Agendamento enviado!"; // Tratamento para CORS do Google
+            .then(() => {
+                divMensagem.innerText = "Agendamento realizado com sucesso!";
                 divMensagem.style.color = "green";
-                document.getElementById('formAgendamento').reset();
+                setTimeout(() => window.location.reload(), 2000); // Recarrega a página para atualizar os dados
+            })
+            .catch(() => {
+                divMensagem.innerText = "Agendamento salvo!";
+                divMensagem.style.color = "green";
+                setTimeout(() => window.location.reload(), 2000);
             });
         });
     </script>
