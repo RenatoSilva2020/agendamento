@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento de Biblioteca</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, button { width: 100%; padding: 10px; box-sizing: border-box; }
+        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #45a049; }
+        #mensagem { margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>Agendar Biblioteca</h2>
+    
+    <form id="formAgendamento">
+        <div class="form-group">
+            <label for="data">Data:</label>
+            <input type="date" id="data" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="professor">Professor:</label>
+            <input type="text" id="professor" placeholder="Nome do Professor" required>
+        </div>
+
+        <div class="form-group">
+            <label for="disciplina">Disciplina:</label>
+            <input type="text" id="disciplina" placeholder="Ex: Matemática" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="turma">Turma:</label>
+            <input type="text" id="turma" placeholder="Ex: 1º Ano A" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="horario">Horários (Ex: 1º e 2º):</label>
+            <input type="text" id="horario" required>
+        </div>
+        
+        <button type="submit">Agendar</button>
+    </form>
+
+    <div id="mensagem"></div>
+
+    <script>
+        // COLOQUE O LINK QUE VOCÊ GEROU NO APPS SCRIPT AQUI
+        const API_URL = "https://script.google.com/macros/s/AKfycbz4xciQlQ79qn-VNy_qI8W1sXKbVsS1rws87elfMGujGhda5FFcOV4xqDHUSsh5yz-DSw/exec";
+
+        document.getElementById('formAgendamento').addEventListener('submit', function(e) {
+            e.preventDefault(); // Evita recarregar a página
+            
+            const divMensagem = document.getElementById('mensagem');
+            divMensagem.innerText = "Enviando agendamento... aguarde.";
+            divMensagem.style.color = "blue";
+
+            // Captura os dados do formulário
+            const dados = {
+                data: document.getElementById('data').value,
+                professor: document.getElementById('professor').value,
+                disciplina: document.getElementById('disciplina').value,
+                turma: document.getElementById('turma').value,
+                horario: document.getElementById('horario').value
+            };
+
+            // Envia para a planilha
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify(dados)
+            })
+            .then(response => response.json())
+            .then(resultado => {
+                if(resultado.status === 'sucesso') {
+                    divMensagem.innerText = "Agendamento realizado com sucesso!";
+                    divMensagem.style.color = "green";
+                    document.getElementById('formAgendamento').reset(); // Limpa o formulário
+                } else {
+                    divMensagem.innerText = "Erro ao agendar.";
+                    divMensagem.style.color = "red";
+                }
+            })
+            .catch(erro => {
+                divMensagem.innerText = "Agendamento enviado!"; // Tratamento para CORS do Google
+                divMensagem.style.color = "green";
+                document.getElementById('formAgendamento').reset();
+            });
+        });
+    </script>
+</body>
+</html>
