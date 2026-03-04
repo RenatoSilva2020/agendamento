@@ -10,6 +10,7 @@
     
     <style>
         :root {
+            /* Cores Gerais */
             --bg-body: #f4f7fb; --text-dark: #1e293b; --text-muted: #64748b; --border: #e2e8f0;
             --primary: #2563eb; --primary-hover: #1d4ed8; --success: #10b981; --danger: #ef4444;
             --roxo-btn: #7c3aed; --roxo-btn-hover: #6d28d9; --verde-btn: #059669; --verde-btn-hover: #047857;
@@ -42,6 +43,12 @@
         .nome-destaque { color: var(--verde-btn); font-size: 22px; font-weight: 700; margin: 5px 0 20px 0; text-transform: uppercase; }
         .link-trocar { display: inline-block; margin-top: 20px; color: #64748b; font-size: 14px; text-decoration: underline; cursor: pointer; }
 
+        /* Botões de Opção (Substituindo os Selects) */
+        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
+        .btn-option { padding: 16px; border: 2px solid var(--border); border-radius: 14px; background: white; color: var(--text-dark); font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; text-align: left; box-sizing: border-box; width: 100%;}
+        .btn-option:hover { border-color: #cbd5e1; background: #f8fafc; }
+        .btn-option.active { border-color: var(--roxo-btn); background: #f5f3ff; color: var(--roxo-btn); font-weight: 600; box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1); }
+
         /* App */
         .user-header { display: flex; flex-direction: column; background: #eff6ff; padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #bfdbfe; position: relative;}
         .user-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px;}
@@ -59,8 +66,9 @@
         .dia-parcial { background-color: #fef08a !important; font-weight: bold; } .dia-lotado { background-color: #fecaca !important; color: #991b1b !important; }
 
         .horarios-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
-        .slot-card { padding: 14px 15px; border-radius: 12px; border: 1px solid var(--border); background: #f8fafc; display: flex; justify-content: space-between; align-items: center; }
+        .slot-card { padding: 14px 15px; border-radius: 12px; border: 1px solid var(--border); background: #f8fafc; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;}
         .slot-card.livre { border-color: var(--success); background: #f0fdf4; cursor: pointer; }
+        .slot-card.livre:hover { border-color: #059669; }
         .slot-card.ocupado { opacity: 0.7; background: #f1f5f9; border-color: transparent;}
         .slot-card.meu-agendamento { border-color: var(--primary); background: #eff6ff; }
         .slot-info { display: flex; flex-direction: column; }
@@ -74,7 +82,9 @@
 
     <div class="card text-center">
         
-        <div id="loading">⏳ Conectando ao sistema...</div>
+        <div id="loading" style="font-weight: 500; color: var(--text-muted); margin-top: 10px;">
+            ⏳ Atualizando dados do Sistema...
+        </div>
 
         <div id="tela-login" class="hidden">
             <img src="https://i.ibb.co/JFKTr9sc/logo.png" alt="Logo" class="logo">
@@ -85,12 +95,12 @@
                 <label class="label-pequena">Matrícula (MASP)</label>
                 <input type="text" id="masp-input" class="input-text" placeholder="Ex: 1234567" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 <button class="btn-roxo" onclick="fazerLogin()">Acessar Sistema <span>→</span></button>
-                <div id="login-erro" style="color: var(--danger); margin-top: 15px; font-size: 14px;"></div>
+                <div id="login-erro" style="color: var(--danger); margin-top: 15px; font-size: 14px; font-weight: 500;"></div>
             </div>
 
             <div id="login-welcome-view" class="hidden">
                 <div class="circulo-sucesso"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                <p style="margin:0;">Bem vindo(a),</p>
+                <p style="margin:0; font-size: 20px; font-weight: 500;">Bem vindo(a),</p>
                 <div id="nome-boas-vindas" class="nome-destaque">NOME</div>
                 <button class="btn-verde" onclick="mostrarTelaSelecao()">Acessar Sistema <span>→</span></button>
                 <a class="link-trocar" onclick="trocarUsuario()">Trocar de usuário</a>
@@ -103,24 +113,26 @@
             <p class="subtitulo">Selecione o espaço e o turno que deseja acessar.</p>
 
             <label class="label-pequena">Espaço / Laboratório</label>
-            <select id="sel-ambiente" class="input-select">
-                <option value="BIBLIOTECA">Biblioteca</option>
-                <option value="LAB. INFORMÁTICA">Laboratório de Informática</option>
-                <option value="LAB. CIÊNCIAS">Laboratório de Ciências</option>
-            </select>
+            <div class="btn-group" id="grupo-ambiente">
+                <button class="btn-option active" data-value="BIBLIOTECA">Biblioteca</button>
+                <button class="btn-option" data-value="LAB. INFORMÁTICA">Laboratório de Informática</button>
+                <button class="btn-option" data-value="LAB. CIÊNCIAS">Laboratório de Ciências</button>
+            </div>
 
             <label class="label-pequena">Turno</label>
-            <select id="sel-turno" class="input-select">
-                <option value="MANHÃ">Manhã (6 horários)</option>
-                <option value="TARDE">Tarde (6 horários)</option>
-                <option value="NOITE">Noite (4 horários)</option>
-            </select>
+            <div class="btn-group" id="grupo-turno">
+                <button class="btn-option active" data-value="MANHÃ">Manhã (6 horários)</button>
+                <button class="btn-option" data-value="TARDE">Tarde (6 horários)</button>
+                <button class="btn-option" data-value="NOITE">Noite (4 horários)</button>
+            </div>
 
             <button class="btn-roxo" onclick="acessarAgenda()">Abrir Agenda</button>
             <a class="link-trocar" onclick="fazerLogout()">Sair do sistema</a>
         </div>
 
         <div id="app-container" class="hidden" style="text-align: left;">
+            <img src="https://i.ibb.co/JFKTr9sc/logo.png" alt="Logo" class="logo" style="margin-bottom: 20px; max-width: 60px;">
+            
             <div class="user-header">
                 <div class="user-header-top">
                     <div>Prof(a). <strong id="nome-usuario-logado"></strong></div>
@@ -151,7 +163,7 @@
                 <select id="turma" class="input-select" required><option value="">Selecione...</option></select>
                 <button type="submit" class="btn-principal" id="btnAgendar">Confirmar Agendamento</button>
             </form>
-            <div id="mensagem" style="text-align:center; font-weight:600;"></div>
+            <div id="mensagem" style="text-align:center; font-weight:600; margin-top: 15px;"></div>
         </div>
 
     </div>
@@ -160,8 +172,9 @@
     <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
     
     <script>
-        // COLOQUE AQUI SUA NOVA URL DO APPS SCRIPT
-        const API_URL = "https://script.google.com/macros/s/AKfycbzDJYqCSm51fxcPiOdhqyeDPzzfEM_d4lMWP93urqqenAGntR7OPBQo1muBoIRWUQ7NFQ/exec"; 
+        // ======= COLOQUE AQUI SUA NOVA URL DO APPS SCRIPT =======
+        const API_URL = "https://script.google.com/macros/s/AKfycbzZihje5_Nly5ygS_W6B4cvwkcQYz8HCzCx6Ca7G-LO9C8crHcJzRpZbM8m3bFmaBBmbw/exec"; 
+        // ========================================================
         
         let dadosIniciais = {};
         let reservasAtuais = {};
@@ -175,6 +188,23 @@
         let flatpickrInst = null;
 
         function obterNomeCurto(nome) { let p = nome.trim().split(" "); return p[0] + (p.length>1?" "+p[p.length-1]:""); }
+
+        // Ativação visual dos botões de seleção
+        document.addEventListener('DOMContentLoaded', () => {
+            const setupButtonGroup = (groupId) => {
+                const group = document.getElementById(groupId);
+                if(!group) return;
+                const buttons = group.querySelectorAll('.btn-option');
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        buttons.forEach(b => b.classList.remove('active')); 
+                        btn.classList.add('active'); 
+                    });
+                });
+            };
+            setupButtonGroup('grupo-ambiente');
+            setupButtonGroup('grupo-turno');
+        });
 
         // 1. CARREGAMENTO INICIAL (Profs e Turmas)
         window.onload = function() {
@@ -232,8 +262,11 @@
 
         // 3. CARREGAR A AGENDA ESPECÍFICA
         function acessarAgenda() {
-            ambienteSelecionado = document.getElementById('sel-ambiente').value;
-            turnoSelecionado = document.getElementById('sel-turno').value;
+            ambienteSelecionado = document.querySelector('#grupo-ambiente .btn-option.active').dataset.value;
+            turnoSelecionado = document.querySelector('#grupo-turno .btn-option.active').dataset.value;
+            
+            // ATENÇÃO: Verifique se as guias do seu Google Sheets têm exatamente este formato:
+            // "BIBLIOTECA - MANHÃ (SEDE)". Se não tiver "(SEDE)", remova essa parte abaixo:
             nomeGuiaPlanilha = `${ambienteSelecionado} - ${turnoSelecionado} (SEDE)`;
             limiteHorarios = (turnoSelecionado === "NOITE") ? 4 : 6;
 
@@ -255,7 +288,7 @@
             document.getElementById('nome-usuario-logado').innerText = obterNomeCurto(usuarioLogado.nome);
             document.getElementById('badge-ambiente').innerText = nomeGuiaPlanilha;
 
-            if(flatpickrInst) flatpickrInst.destroy(); // Reseta se já existir
+            if(flatpickrInst) flatpickrInst.destroy(); 
             
             flatpickrInst = flatpickr("#data", {
                 locale: "pt", inline: true, dateFormat: "d/m/Y", minDate: "today",
@@ -277,13 +310,13 @@
             });
         }
 
-        // 4. LÓGICA DE HORÁRIOS E BOTÕES (Adaptado para 4 ou 6)
+        // 4. LÓGICA DE HORÁRIOS
         function gerarListaHorarios(dataStr) {
             const wrapper = document.getElementById('horarios-wrapper');
             wrapper.innerHTML = ''; 
             let ocupacao = reservasAtuais[dataStr] || [null, null, null, null, null, null];
 
-            for(let i = 0; i < limiteHorarios; i++) { // Roda 4 ou 6 vezes
+            for(let i = 0; i < limiteHorarios; i++) { 
                 let horarioNum = i + 1;
                 let slot = ocupacao[i];
                 let div = document.createElement('div');
@@ -293,12 +326,12 @@
                     div.innerHTML = `<div class="slot-info"><span class="slot-title">${horarioNum}º Horário</span><span class="slot-desc" style="color:var(--success)">Disponível</span></div><input type="checkbox" class="chk-horario" value="${horarioNum}">`;
                     div.onclick = function(e) { if(e.target.tagName !== 'INPUT') { let c=this.querySelector('input'); c.checked=!c.checked; verificarSelecao(); }};
                     div.querySelector('input').addEventListener('change', verificarSelecao);
-                } else if (slot.id && slot.prof.includes(usuarioLogado.nome)) { // Checagem básica pelo nome
+                } else if (slot.id && slot.prof.includes(usuarioLogado.nome)) { 
                     div.className = 'slot-card meu-agendamento';
                     div.innerHTML = `<div class="slot-info"><span class="slot-title">${horarioNum}º Horário</span><span class="slot-desc">Sua reserva: ${slot.disciplina}</span></div><button class="btn-cancelar" onclick="cancelar('${slot.id}')">Cancelar</button>`;
                 } else {
                     div.className = 'slot-card ocupado';
-                    div.innerHTML = `<div class="slot-info"><span class="slot-title">${horarioNum}º Horário</span><span class="slot-desc">${slot.prof}</span></div><span>🔒</span>`;
+                    div.innerHTML = `<div class="slot-info"><span class="slot-title">${horarioNum}º Horário</span><span class="slot-desc">${slot.prof}</span></div><span style="font-size: 16px; opacity: 0.5;">🔒</span>`;
                 }
                 wrapper.appendChild(div);
             }
@@ -322,15 +355,22 @@
         });
 
         function cancelar(idAgenda) {
-            if(confirm("Cancelar esta reserva?")) enviarParaPlanilha({ sheetName: nomeGuiaPlanilha, action: 'cancelar', idAgenda: idAgenda }, "Cancelando...");
+            if(confirm("Deseja realmente cancelar esta reserva? O horário ficará livre novamente.")) {
+                enviarParaPlanilha({ sheetName: nomeGuiaPlanilha, action: 'cancelar', idAgenda: idAgenda }, "Cancelando reserva...");
+            }
         }
 
         function enviarParaPlanilha(dados, msg) {
-            document.getElementById('mensagem').innerText = msg;
+            const divMensagem = document.getElementById('mensagem');
+            divMensagem.innerText = msg; divMensagem.style.color = "var(--primary)";
+            
             fetch(API_URL, { method: 'POST', redirect: "follow", body: JSON.stringify(dados) })
             .then(() => {
-                document.getElementById('mensagem').innerText = "Sucesso!";
-                setTimeout(() => acessarAgenda(), 1000); // Recarrega a agenda atual
+                divMensagem.innerText = "Sucesso!"; divMensagem.style.color = "var(--success)";
+                setTimeout(() => {
+                    divMensagem.innerText = "";
+                    acessarAgenda(); // Recarrega os dados da aba atual
+                }, 1500); 
             });
         }
     </script>
