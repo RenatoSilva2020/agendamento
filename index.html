@@ -60,7 +60,6 @@
         
         .btn-sair { background: #fee2e2; border: 1px solid #fca5a5; color: #b91c1c; font-weight: 600; cursor: pointer; padding: 6px 14px; font-size: 12px; border-radius: 8px; transition: 0.2s;}
         .btn-sair:hover { background: #fecaca; }
-        /* O botão verde de Novo Agendamento */
         .btn-novo-agendamento { background: var(--success); color: white; border: none; font-weight: 600; cursor: pointer; font-size: 14px; padding: 12px; border-radius: 10px; margin-top: 12px; text-align: center; width: 100%; transition: 0.2s; box-sizing: border-box;}
         .btn-novo-agendamento:hover { background: #059669; }
 
@@ -85,7 +84,7 @@
         input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--success); cursor: pointer; }
         .btn-cancelar { background: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
         
-        /* Nova Tela de Carregamento Padrão */
+        /* Tela de Carregamento Padrão */
         .tela-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; }
         .tela-loading img { max-width: 70px; margin-bottom: 15px; animation: pulse 2s infinite; }
         .tela-loading p { font-weight: 600; color: var(--text-muted); font-size: 15px; margin: 0; }
@@ -204,7 +203,6 @@
 
         function obterNomeCurto(nome) { let p = nome.trim().split(" "); return p[0] + (p.length>1?" "+p[p.length-1]:""); }
 
-        // Ativação visual dos botões de seleção
         document.addEventListener('DOMContentLoaded', () => {
             const setupButtonGroup = (groupId) => {
                 const group = document.getElementById(groupId);
@@ -221,12 +219,12 @@
             setupButtonGroup('grupo-turno');
         });
 
-        // 1. CARREGAMENTO INICIAL
+        // 1. CARREGAMENTO INICIAL COM ANTI-CACHE (+ nova data pro servidor forçar atualização)
         window.onload = function() {
-            fetch(API_URL, { redirect: "follow" })
+            fetch(`${API_URL}?_t=${new Date().getTime()}`, { redirect: "follow" })
                 .then(res => res.json())
                 .then(dados => {
-                    dadosIniciais = dados; // Salva todas as turmas e turnos na memória
+                    dadosIniciais = dados; 
 
                     document.getElementById('loading').classList.add('hidden');
                     
@@ -267,14 +265,14 @@
             document.getElementById('tela-selecao').classList.remove('hidden');
             document.getElementById('sessao-horarios').classList.add('hidden');
             document.getElementById('formAgendamento').classList.add('hidden');
-            document.getElementById('btn-novo-agendamento').classList.add('hidden'); // Esconde o botão ao voltar
+            document.getElementById('btn-novo-agendamento').classList.add('hidden'); 
             if(flatpickrInst) flatpickrInst.clear();
         }
 
         function trocarUsuario() { localStorage.removeItem('biblio_masp'); location.reload(); }
         function fazerLogout() { trocarUsuario(); }
 
-        // 3. CARREGAR A AGENDA ESPECÍFICA E FILTRAR TURMAS
+        // 3. CARREGAR A AGENDA ESPECÍFICA (AGORA COM ANTI-CACHE)
         function acessarAgenda() {
             ambienteSelecionado = document.querySelector('#grupo-ambiente .btn-option.active').dataset.value;
             turnoSelecionado = document.querySelector('#grupo-turno .btn-option.active').dataset.value;
@@ -282,9 +280,8 @@
             nomeGuiaPlanilha = `${ambienteSelecionado} - ${turnoSelecionado} (SEDE)`;
             limiteHorarios = (turnoSelecionado === "NOITE") ? 4 : 6;
 
-            // Filtra as turmas do select baseadas no turno selecionado
             let selTurma = document.getElementById('turma');
-            selTurma.innerHTML = '<option value="">Selecione...</option>'; // Limpa as opções anteriores
+            selTurma.innerHTML = '<option value="">Selecione...</option>'; 
             if (dadosIniciais.turmas) {
                 dadosIniciais.turmas.forEach(t => {
                     if(t.turno === turnoSelecionado.toUpperCase()) {
@@ -294,14 +291,19 @@
             }
 
             document.getElementById('tela-selecao').classList.add('hidden');
-            document.getElementById('loading').classList.remove('hidden'); // Mostra a nova tela limpa
+            document.getElementById('loading').classList.remove('hidden'); 
 
-            fetch(`${API_URL}?action=getReservas&sheetName=${encodeURIComponent(nomeGuiaPlanilha)}`, { redirect: "follow" })
-                .then(res => res.json())
-                .then(dados => {
-                    reservasAtuais = dados.reservas || {};
-                    iniciarAppCalendario();
-                });
+            // Link com &t= anti-cache forçado
+            fetch(`${API_URL}?action=getReservas&sheetName=${encodeURIComponent(nomeGuiaPlanilha)}&_t=${new Date().getTime()}`, { 
+                method: 'GET',
+                cache: 'no-store',
+                redirect: "follow" 
+            })
+            .then(res => res.json())
+            .then(dados => {
+                reservasAtuais = dados.reservas || {};
+                iniciarAppCalendario();
+            });
         }
 
         function iniciarAppCalendario() {
@@ -368,7 +370,7 @@
             else document.getElementById('formAgendamento').classList.add('hidden');
         }
 
-        // 5. ENVIAR E CANCELAR
+        // 5. ENVIAR E CANCELAR INTELIGENTE (ATUALIZA A TELA SEM RECARREGAR)
         document.getElementById('formAgendamento').addEventListener('submit', function(e) {
             e.preventDefault();
             let m = Array.from(document.querySelectorAll('input.chk-horario:checked')).map(cb => parseInt(cb.value));
@@ -402,19 +404,28 @@
                     divMensagem.innerText = "Sucesso!"; 
                     divMensagem.style.color = "var(--success)";
                     
-                    // Exibe o botão de "Novo Agendamento" em verde no topo!
                     document.getElementById('btn-novo-agendamento').classList.remove('hidden');
+
+                    // Recebe as reservas do POST e atualiza o calendário na mesma hora
+                    if(retorno.reservas) {
+                        reservasAtuais = retorno.reservas;
+                    }
 
                     setTimeout(() => {
                         divMensagem.innerText = "";
-                        acessarAgenda(); 
+                        iniciarAppCalendario(); 
+                        
+                        // Refaz a lista de horários do dia selecionado automaticamente!
+                        if(dataSelecionadaStr) {
+                            flatpickrInst.setDate(dataSelecionadaStr, true);
+                        }
                     }, 1500); 
                 } else {
                     throw new Error("Falha no servidor do Google");
                 }
             })
             .catch(erro => {
-                divMensagem.innerText = "Erro ao salvar! Verifique se os nomes das abas na planilha estão corretos e atualize o link (Nova Implantação)."; 
+                divMensagem.innerText = "Erro ao salvar! Ocorreu um erro no acesso à Planilha do Google."; 
                 divMensagem.style.color = "var(--danger)";
                 console.error("Erro no fetch:", erro);
             });
