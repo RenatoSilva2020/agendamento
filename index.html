@@ -39,7 +39,7 @@
         .subtitulo { color: var(--text-muted); font-size: 15px; margin-bottom: 30px; }
         .label-pequena { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; text-align: left;}
         
-        /* Customizações de Título e Label (Pedidos pelo usuário) */
+        /* Customizações de Título e Label */
         .texto-preto-destaque { color: #000; font-size: 16px; font-weight: 500; margin-bottom: 25px; }
         .label-negrito { color: #000; font-weight: 800; font-size: 13px; margin-bottom: 10px; }
 
@@ -47,7 +47,7 @@
         .nome-destaque { color: var(--verde-btn); font-size: 22px; font-weight: 700; margin: 5px 0 20px 0; text-transform: uppercase; }
         .link-trocar { display: inline-block; margin-top: 20px; color: #64748b; font-size: 14px; text-decoration: underline; cursor: pointer; }
 
-        /* Botões de Opção (Substituindo os Selects) */
+        /* Botões de Opção */
         .btn-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
         .btn-option { padding: 16px; border: 2px solid var(--border); border-radius: 14px; background: white; color: var(--text-dark); font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; text-align: left; box-sizing: border-box; width: 100%;}
         .btn-option:hover { border-color: #cbd5e1; background: #f8fafc; }
@@ -345,7 +345,7 @@
             else document.getElementById('formAgendamento').classList.add('hidden');
         }
 
-        // 5. ENVIAR E CANCELAR
+        // 5. ENVIAR E CANCELAR (ATUALIZADO PARA MOSTRAR ERROS REAIS)
         document.getElementById('formAgendamento').addEventListener('submit', function(e) {
             e.preventDefault();
             let m = Array.from(document.querySelectorAll('input.chk-horario:checked')).map(cb => parseInt(cb.value));
@@ -364,15 +364,32 @@
 
         function enviarParaPlanilha(dados, msg) {
             const divMensagem = document.getElementById('mensagem');
-            divMensagem.innerText = msg; divMensagem.style.color = "var(--primary)";
+            divMensagem.innerText = msg; 
+            divMensagem.style.color = "var(--primary)";
             
-            fetch(API_URL, { method: 'POST', redirect: "follow", body: JSON.stringify(dados) })
-            .then(() => {
-                divMensagem.innerText = "Sucesso!"; divMensagem.style.color = "var(--success)";
-                setTimeout(() => {
-                    divMensagem.innerText = "";
-                    acessarAgenda(); 
-                }, 1500); 
+            fetch(API_URL, { 
+                method: 'POST', 
+                redirect: "follow",
+                body: JSON.stringify(dados),
+                headers: { "Content-Type": "text/plain;charset=utf-8" }
+            })
+            .then(res => res.json())
+            .then(retorno => {
+                if(retorno && retorno.sucesso) {
+                    divMensagem.innerText = "Sucesso!"; 
+                    divMensagem.style.color = "var(--success)";
+                    setTimeout(() => {
+                        divMensagem.innerText = "";
+                        acessarAgenda(); 
+                    }, 1500); 
+                } else {
+                    throw new Error("Falha no servidor do Google");
+                }
+            })
+            .catch(erro => {
+                divMensagem.innerText = "Erro ao salvar! Verifique se os nomes das abas na planilha estão corretos e atualize o link (Nova Implantação)."; 
+                divMensagem.style.color = "var(--danger)";
+                console.error("Erro no fetch:", erro);
             });
         }
     </script>
