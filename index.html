@@ -73,7 +73,7 @@
         .slot-card.meu-agendamento { border-color: var(--primary); background: #eff6ff; }
         .slot-info { display: flex; flex-direction: column; }
         .slot-title { font-weight: 600; font-size: 15px; }
-        .slot-desc { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        .slot-desc { font-size: 13px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
         input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--success); cursor: pointer; }
         .btn-cancelar { background: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
         
@@ -179,7 +179,7 @@
     
     <script>
         // ======= COLOQUE AQUI SUA NOVA URL DO APPS SCRIPT =======
-        const API_URL = "https://script.google.com/macros/s/AKfycbzubY34bIJiJ7Y22zOK8eo-3O0tduASyjZiI1lCrl4WyIqGlSyVMKeQCeLHVoIg-KctHw/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbwUaoiXClfNMs79N7yvdDgpQsa6-rn7evDUdqv1ftXyECQIcB5R8N1HEaYvq5ZL2XAprg/exec"; 
         // ========================================================
         
         let dadosIniciais = {};
@@ -308,7 +308,6 @@
                 locale: "pt", inline: true, dateFormat: "d/m/Y", minDate: "today",
                 disable: [ function(date) { return (date.getDay() === 0 || date.getDay() === 6); } ],
                 onDayCreate: function(dObj, dStr, fp, dayElem) {
-                    // Aqui usamos a formatação do próprio motor do calendário para bater idêntico com o JS
                     let dFmt = fp.formatDate(dayElem.dateObj, "d/m/Y");
                     
                     if (reservasAtuais[dFmt]) {
@@ -341,13 +340,13 @@
                     div.onclick = function(e) { if(e.target.tagName !== 'INPUT') { let c=this.querySelector('input'); c.checked=!c.checked; verificarSelecao(); }};
                     div.querySelector('input').addEventListener('change', verificarSelecao);
                 } 
-                // Usando trim() e comparando o nome diretamente como foi salvo na planilha
                 else if (slot.id && slot.prof.trim() === usuarioLogado.nome.trim()) { 
                     div.className = 'slot-card meu-agendamento';
-                    div.innerHTML = `<div class="slot-info"><span class="slot-title">${horarioNum}º Horário</span><span class="slot-desc">Sua reserva: ${slot.turma}</span></div><button class="btn-cancelar" onclick="cancelar('${slot.id}')">Cancelar</button>`;
+                    div.innerHTML = `<div class="slot-info"><span class="slot-title">${horarioNum}º Horário</span><span class="slot-desc">Sua reserva: ${slot.turma}</span></div><button class="btn-cancelar" onclick="cancelar('${slot.id}', ${i})">Cancelar</button>`;
                 } else {
+                    // MUDANÇA AQUI: Formatação da exibição do professor e turma
                     div.className = 'slot-card ocupado';
-                    div.innerHTML = `<div class="slot-info"><span class="slot-title">${horarioNum}º Horário</span><span class="slot-desc">${slot.prof}</span></div><span style="font-size: 16px; opacity: 0.5;">🔒</span>`;
+                    div.innerHTML = `<div class="slot-info"><span class="slot-title">${horarioNum}º Horário</span><span class="slot-desc"><strong>PROFESSOR(A):</strong> ${slot.prof}<br><strong>TURMA:</strong> ${slot.turma}</span></div><span style="font-size: 16px; opacity: 0.5;">🔒</span>`;
                 }
                 wrapper.appendChild(div);
             }
@@ -369,9 +368,9 @@
             }, "Registrando agendamento...");
         });
 
-        function cancelar(idAgenda) {
+        function cancelar(idAgenda, slotIndex) {
             if(confirm("Deseja realmente cancelar esta reserva? O horário ficará livre novamente.")) {
-                enviarParaPlanilha({ sheetName: nomeGuiaPlanilha, action: 'cancelar', idAgenda: idAgenda }, "Cancelando reserva...");
+                enviarParaPlanilha({ sheetName: nomeGuiaPlanilha, action: 'cancelar', idAgenda: idAgenda, slotIndex: slotIndex }, "Cancelando reserva...");
             }
         }
 
