@@ -3,307 +3,318 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendamento de Biblioteca</title>
+    <title>Sistema de Biblioteca</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     
     <style>
         :root {
-            --primary: #10b981;
-            --primary-hover: #059669;
-            --bg: #f3f4f6;
-            --text: #1f2937;
-            --border: #d1d5db;
+            --primary: #2563eb; --primary-hover: #1d4ed8;
+            --success: #10b981; --danger: #ef4444;
+            --bg: #f3f4f6; --text: #1f2937; --border: #d1d5db;
         }
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            padding: 40px 20px;
-            margin: 0;
-        }
-
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            width: 100%;
-            max-width: 500px;
-        }
-
-        h2 { margin-top: 0; color: #111827; text-align: center; }
-
-        .form-group { margin-bottom: 20px; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 40px 20px; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); width: 100%; max-width: 550px; }
+        h2 { margin-top: 0; text-align: center; color: #111827; }
         
-        label { 
-            display: block; 
-            margin-bottom: 8px; 
-            font-weight: 500; 
-            font-size: 14px;
-        }
+        /* TELA DE LOGIN */
+        #tela-login { text-align: center; padding: 20px 0; }
+        #tela-login p { margin-bottom: 20px; color: #4b5563; }
+        #masp-input { width: 100%; max-width: 300px; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 6px; text-align: center; letter-spacing: 1px; }
 
-        input[type="text"], input[type="date"], select { 
-            width: 100%; 
-            padding: 10px 12px; 
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-            font-size: 15px;
-            transition: border-color 0.2s;
-        }
+        /* CABEÇALHO DO USUÁRIO */
+        .user-header { display: flex; justify-content: space-between; align-items: center; background: #eff6ff; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; border: 1px solid #bfdbfe; }
+        .btn-sair { background: none; border: none; color: var(--danger); font-weight: 600; cursor: pointer; padding: 0; font-size: 13px; }
 
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-        }
+        /* CALENDÁRIO */
+        .calendario-container { display: flex; justify-content: center; margin-bottom: 15px; }
+        .legendas { display: flex; justify-content: center; gap: 15px; font-size: 12px; margin-bottom: 20px; }
+        .legenda-item { display: flex; align-items: center; gap: 5px; }
+        .bolinha { width: 12px; height: 12px; border-radius: 50%; }
+        .bg-livre { background-color: #e5e7eb; }
+        .bg-parcial { background-color: #fef08a; border: 1px solid #eab308; }
+        .bg-lotado { background-color: #fecaca; border: 1px solid #ef4444; }
 
-        .horarios-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            background: #f9fafb;
-            padding: 15px;
-            border-radius: 6px;
-            border: 1px dashed var(--border);
-        }
+        .dia-parcial { background-color: #fef08a !important; font-weight: bold; }
+        .dia-lotado { background-color: #fecaca !important; color: #991b1b !important; } /* Removido o bloqueio de clique! */
 
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            font-weight: 400;
-            cursor: pointer;
-            font-size: 14px;
-        }
+        /* LISTA DE HORÁRIOS */
+        .horarios-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
+        .slot-card { padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border); background: #f9fafb; display: flex; justify-content: space-between; align-items: center; }
+        .slot-card.livre { border-color: var(--success); background: #f0fdf4; cursor: pointer; }
+        .slot-card.ocupado { opacity: 0.8; background: #f3f4f6; }
+        .slot-card.meu-agendamento { border-color: var(--primary); background: #eff6ff; }
+        
+        .slot-info { display: flex; flex-direction: column; }
+        .slot-title { font-weight: 600; font-size: 15px; }
+        .slot-desc { font-size: 13px; color: #4b5563; margin-top: 3px; }
+        
+        input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--success); cursor: pointer; }
+        .btn-cancelar { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; }
 
-        .checkbox-label input {
-            margin-right: 8px;
-            width: 16px;
-            height: 16px;
-            accent-color: var(--primary);
-        }
-
-        button { 
-            width: 100%; 
-            padding: 12px; 
-            background-color: var(--primary); 
-            color: white; 
-            border: none; 
-            border-radius: 6px;
-            cursor: pointer; 
-            font-size: 16px; 
-            font-weight: 600;
-            transition: background-color 0.2s;
-            margin-top: 10px;
-        }
-
-        button:hover { background-color: var(--primary-hover); }
+        /* FORMULÁRIO */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px; }
+        input[type="text"], select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
+        
+        button.btn-principal { width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600; margin-top: 10px; }
+        button.btn-principal:hover { background-color: var(--primary-hover); }
         button:disabled { background-color: #9ca3af; cursor: not-allowed; }
 
-        #mensagem { 
-            margin-top: 15px; 
-            text-align: center; 
-            font-weight: 500; 
-            font-size: 14px;
-        }
-
-        .loading-overlay {
-            text-align: center;
-            padding: 20px;
-            color: #6b7280;
-            font-weight: 500;
-        }
-
-        .hidden { display: none; }
-        .aviso-data { color: #d97706; font-size: 13px; font-style: italic;}
+        .hidden { display: none !important; }
+        .passo-titulo { font-weight: 700; color: #374151; margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px; }
+        #mensagem { text-align: center; margin-top: 15px; font-weight: 500;}
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>Agendar Biblioteca</h2>
         
-        <div id="loading" class="loading-overlay">
-            ⏳ Carregando professores e turmas...
+        <div id="loading" style="text-align: center; padding: 20px;">
+            ⏳ Conectando ao sistema...
         </div>
 
-        <form id="formAgendamento" class="hidden">
+        <div id="tela-login" class="hidden">
+            <h2>Acesso do Professor</h2>
+            <p>Digite seu MASP para agendar ou gerenciar horários.</p>
+            <input type="text" id="masp-input" placeholder="Ex: 123456-7">
+            <br><br>
+            <button class="btn-principal" style="max-width: 300px;" onclick="fazerLogin()">Entrar</button>
+            <div id="login-erro" style="color: red; margin-top: 10px; font-size: 14px;"></div>
+        </div>
+
+        <div id="app-container" class="hidden">
             
-            <div class="form-group">
-                <label for="professor">Professor:</label>
-                <select id="professor" required>
-                    <option value="">Selecione o professor...</option>
-                </select>
+            <div class="user-header">
+                <div>Logado como: <strong id="nome-usuario-logado"></strong></div>
+                <button class="btn-sair" onclick="fazerLogout()">Sair</button>
             </div>
 
-            <div class="form-group">
-                <label for="disciplina">Disciplina:</label>
-                <input type="text" id="disciplina" placeholder="Ex: Matemática" required>
+            <div class="passo-titulo">1. Escolha a data</div>
+            <div class="calendario-container">
+                <input type="text" id="data" class="hidden">
             </div>
             
-            <div class="form-group">
-                <label for="turma">Turma:</label>
-                <select id="turma" required>
-                    <option value="">Selecione a turma...</option>
-                </select>
+            <div class="legendas">
+                <div class="legenda-item"><div class="bolinha bg-livre"></div> Livre</div>
+                <div class="legenda-item"><div class="bolinha bg-parcial"></div> Parcial</div>
+                <div class="legenda-item"><div class="bolinha bg-lotado"></div> Lotado</div>
             </div>
 
-            <div class="form-group">
-                <label for="data">Data do Agendamento:</label>
-                <input type="text" id="data" placeholder="Clique para abrir o calendário..." required readonly>
-            </div>
-            
-            <div class="form-group">
-                <label>Horários Disponíveis: <span id="aviso-data" class="aviso-data">(Selecione a data primeiro)</span></label>
-                <div id="horarios-wrapper" class="horarios-container hidden">
+            <div id="sessao-horarios" class="hidden">
+                <div class="passo-titulo">2. Situação dos Horários</div>
+                <div id="horarios-wrapper" class="horarios-list">
                     </div>
             </div>
-            
-            <button type="submit" id="btnAgendar">Confirmar Agendamento</button>
+
+            <form id="formAgendamento" class="hidden">
+                <div class="passo-titulo">3. Confirmar Agendamento</div>
+                <div class="form-group">
+                    <label>Disciplina:</label>
+                    <input type="text" id="disciplina" placeholder="Ex: Matemática" required>
+                </div>
+                <div class="form-group">
+                    <label>Turma:</label>
+                    <select id="turma" required><option value="">Selecione...</option></select>
+                </div>
+                <button type="submit" class="btn-principal" id="btnAgendar">Confirmar</button>
+            </form>
             <div id="mensagem"></div>
-        </form>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
     <script>
-        // O seu link corrigido
-        const API_URL = "https://script.google.com/macros/s/AKfycbz4xciQlQ79qn-VNy_qI8W1sXKbVsS1rws87elfMGujGhda5FFcOV4xqDHUSsh5yz-DSw/exec"; 
+        // COLOQUE AQUI A SUA URL GERADA NO APPS SCRIPT!
+        const API_URL = "SUA_URL_DO_APP_SCRIPT_AQUI"; 
         
-        const TODOS_HORARIOS = ['1º', '2º', '3º', '4º', '5º', '6º'];
-        let agendamentosGerais = [];
+        let dadosGlobais = {};
+        let usuarioLogado = null;
+        let dataSelecionadaStr = "";
 
         window.onload = function() {
             fetch(API_URL, { redirect: "follow" })
                 .then(res => res.json())
                 .then(dados => {
                     if(dados.erro) {
-                        document.getElementById('loading').innerText = "Erro no Google Sheets: " + dados.erro;
-                        return;
+                        document.getElementById('loading').innerText = "Erro: " + dados.erro; return;
                     }
-
-                    agendamentosGerais = dados.agendamentos;
+                    dadosGlobais = dados;
                     
-                    const selectProf = document.getElementById('professor');
-                    dados.professores.forEach(prof => {
-                        let opt = document.createElement('option');
-                        opt.value = prof; opt.innerHTML = prof;
-                        selectProf.appendChild(opt);
-                    });
-
-                    const selectTurma = document.getElementById('turma');
-                    dados.turmas.forEach(t => {
-                        let opt = document.createElement('option');
-                        opt.value = t; opt.innerHTML = t;
-                        selectTurma.appendChild(opt);
-                    });
-
-                    iniciarCalendario();
+                    const selTurma = document.getElementById('turma');
+                    dados.turmas.forEach(t => selTurma.add(new Option(t, t)));
 
                     document.getElementById('loading').classList.add('hidden');
-                    document.getElementById('formAgendamento').classList.remove('hidden');
-                })
-                .catch(err => {
-                    document.getElementById('loading').innerText = "Erro de conexão. Verifique se o link da API está correto ou se a implantação foi atualizada.";
+                    
+                    // Verifica se já estava logado no navegador
+                    const maspSalvo = localStorage.getItem('biblio_masp');
+                    if (maspSalvo) {
+                        document.getElementById('masp-input').value = maspSalvo;
+                        fazerLogin();
+                    } else {
+                        document.getElementById('tela-login').classList.remove('hidden');
+                    }
+                }).catch(err => {
+                    document.getElementById('loading').innerText = "Erro ao carregar dados. Atualizou o script no Google?";
                 });
         };
 
+        function fazerLogin() {
+            const maspDigitado = document.getElementById('masp-input').value.trim();
+            const profEncontrado = dadosGlobais.professores.find(p => p.masp === maspDigitado);
+
+            if (profEncontrado) {
+                usuarioLogado = profEncontrado;
+                localStorage.setItem('biblio_masp', profEncontrado.masp);
+                
+                document.getElementById('nome-usuario-logado').innerText = profEncontrado.nome;
+                document.getElementById('tela-login').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                
+                iniciarCalendario();
+            } else {
+                document.getElementById('login-erro').innerText = "MASP não encontrado na planilha de professores.";
+            }
+        }
+
+        function fazerLogout() {
+            localStorage.removeItem('biblio_masp');
+            location.reload();
+        }
+
         function iniciarCalendario() {
             flatpickr("#data", {
-                locale: "pt",
-                dateFormat: "d/m/Y",
-                minDate: "today", 
-                disable: [
-                    function(date) {
-                        return (date.getDay() === 0 || date.getDay() === 6); // Bloqueia fds
+                locale: "pt", inline: true, dateFormat: "d/m/Y", minDate: "today",
+                disable: [ function(date) { return (date.getDay() === 0 || date.getDay() === 6); } ],
+                onDayCreate: function(dObj, dStr, fp, dayElem) {
+                    let dataFmt = String(dayElem.dateObj.getDate()).padStart(2, '0') + '/' + 
+                                  String(dayElem.dateObj.getMonth() + 1).padStart(2, '0') + '/' + dayElem.dateObj.getFullYear();
+                    
+                    if (dadosGlobais.reservas[dataFmt]) {
+                        let ocupados = dadosGlobais.reservas[dataFmt].filter(v => v !== null).length;
+                        if (ocupados === 6) dayElem.classList.add("dia-lotado");
+                        else if (ocupados > 0) dayElem.classList.add("dia-parcial");
                     }
-                ],
-                onChange: function(selectedDates, dateStr, instance) {
-                    verificarHorariosDisponiveis(dateStr);
+                },
+                onChange: function(selectedDates, dateStr) {
+                    dataSelecionadaStr = dateStr;
+                    gerarListaHorarios(dateStr);
+                    document.getElementById('formAgendamento').classList.add('hidden');
+                    document.getElementById('mensagem').innerText = "";
                 }
             });
         }
 
-        function verificarHorariosDisponiveis(dataSelecionada) {
+        function gerarListaHorarios(dataStr) {
             const wrapper = document.getElementById('horarios-wrapper');
-            const aviso = document.getElementById('aviso-data');
             wrapper.innerHTML = ''; 
             
-            let horariosOcupados = [];
-            
-            agendamentosGerais.forEach(agendamento => {
-                let dataPlanilha = new Date(agendamento[0]).toLocaleDateString('pt-BR');
+            let ocupacaoDoDia = dadosGlobais.reservas[dataStr] || [null, null, null, null, null, null];
+
+            for(let i = 0; i < 6; i++) {
+                let horarioNum = i + 1;
+                let slot = ocupacaoDoDia[i];
                 
-                if(dataPlanilha === dataSelecionada) {
-                    let horariosSalvos = agendamento[4].toString().split(','); 
-                    horariosSalvos.forEach(h => horariosOcupados.push(h.trim()));
+                let div = document.createElement('div');
+                
+                if (!slot) {
+                    // LIVRE
+                    div.className = 'slot-card livre';
+                    div.innerHTML = `
+                        <div class="slot-info">
+                            <span class="slot-title">${horarioNum}º Horário</span>
+                            <span class="slot-desc" style="color: var(--success);">Disponível</span>
+                        </div>
+                        <input type="checkbox" class="chk-horario" value="${horarioNum}">
+                    `;
+                    // Clicar no card marca o checkbox
+                    div.onclick = function(e) {
+                        if(e.target.tagName !== 'INPUT') {
+                            let chk = this.querySelector('input');
+                            chk.checked = !chk.checked;
+                            verificarSelecao();
+                        }
+                    };
+                    div.querySelector('input').addEventListener('change', verificarSelecao);
+                } 
+                else if (slot.masp === usuarioLogado.masp) {
+                    // OCUPADO POR MIM (Pode cancelar)
+                    div.className = 'slot-card meu-agendamento';
+                    div.innerHTML = `
+                        <div class="slot-info">
+                            <span class="slot-title">${horarioNum}º Horário</span>
+                            <span class="slot-desc">Sua reserva: ${slot.disciplina}</span>
+                        </div>
+                        <button class="btn-cancelar" onclick="cancelarAgendamento('${slot.id}')">Cancelar</button>
+                    `;
+                } 
+                else {
+                    // OCUPADO POR OUTRO PROFESSOR (Mostra quem é para negociação)
+                    div.className = 'slot-card ocupado';
+                    div.innerHTML = `
+                        <div class="slot-info">
+                            <span class="slot-title">${horarioNum}º Horário</span>
+                            <span class="slot-desc">Prof. ${slot.prof} (${slot.disciplina})</span>
+                        </div>
+                        <span style="font-size: 18px;">🔒</span>
+                    `;
                 }
-            });
-
-            let horariosLivres = TODOS_HORARIOS.filter(h => !horariosOcupados.includes(h));
-
-            if(horariosLivres.length === 0) {
-                wrapper.innerHTML = '<span style="color:red; font-size: 14px; grid-column: span 2;">Todos os horários estão ocupados neste dia. Escolha outra data.</span>';
-            } else {
-                horariosLivres.forEach(horario => {
-                    let label = document.createElement('label');
-                    label.className = 'checkbox-label';
-                    label.innerHTML = `<input type="checkbox" name="horario" value="${horario}"> ${horario} Horário`;
-                    wrapper.appendChild(label);
-                });
+                
+                wrapper.appendChild(div);
             }
-
-            wrapper.classList.remove('hidden');
-            aviso.classList.add('hidden');
+            document.getElementById('sessao-horarios').classList.remove('hidden');
         }
 
+        function verificarSelecao() {
+            let selecionadosLivres = document.querySelectorAll('input.chk-horario:checked');
+            if (selecionadosLivres.length > 0) document.getElementById('formAgendamento').classList.remove('hidden');
+            else document.getElementById('formAgendamento').classList.add('hidden');
+        }
+
+        // AGENDAR
         document.getElementById('formAgendamento').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            let checkboxes = document.querySelectorAll('input[name="horario"]:checked');
-            let horariosSelecionados = Array.from(checkboxes).map(cb => cb.value);
-
-            if(horariosSelecionados.length === 0) {
-                alert("Você precisa selecionar pelo menos um horário para agendar.");
-                return;
-            }
-
-            const divMensagem = document.getElementById('mensagem');
-            const btn = document.getElementById('btnAgendar');
-            divMensagem.innerText = "Salvando na planilha...";
-            divMensagem.style.color = "blue";
-            btn.disabled = true;
-
-            const dados = {
-                data: document.getElementById('data').value,
-                professor: document.getElementById('professor').value,
+            let marcados = Array.from(document.querySelectorAll('input.chk-horario:checked')).map(cb => parseInt(cb.value));
+            enviarParaPlanilha({
+                action: 'agendar',
+                data: dataSelecionadaStr,
+                masp: usuarioLogado.masp,
+                nome: usuarioLogado.nome,
                 disciplina: document.getElementById('disciplina').value,
                 turma: document.getElementById('turma').value,
-                horarios: horariosSelecionados
-            };
-
-            fetch(API_URL, {
-                method: 'POST',
-                redirect: "follow",
-                body: JSON.stringify(dados)
-            })
-            .then(() => {
-                divMensagem.innerText = "Agendamento confirmado com sucesso!";
-                divMensagem.style.color = "green";
-                setTimeout(() => window.location.reload(), 2000); 
-            })
-            .catch(() => {
-                divMensagem.innerText = "Agendamento salvo!";
-                divMensagem.style.color = "green";
-                setTimeout(() => window.location.reload(), 2000);
-            });
+                h1: marcados.includes(1), h2: marcados.includes(2), h3: marcados.includes(3),
+                h4: marcados.includes(4), h5: marcados.includes(5), h6: marcados.includes(6)
+            }, "Agendando...");
         });
+
+        // CANCELAR
+        function cancelarAgendamento(idAgenda) {
+            if(confirm("Tem certeza que deseja cancelar esta reserva? Os horários ficarão livres para outros professores.")) {
+                enviarParaPlanilha({
+                    action: 'cancelar',
+                    idAgenda: idAgenda,
+                    masp: usuarioLogado.masp
+                }, "Cancelando reserva...");
+            }
+        }
+
+        function enviarParaPlanilha(dados, msgLoading) {
+            const divMensagem = document.getElementById('mensagem');
+            divMensagem.innerText = msgLoading; divMensagem.style.color = "blue";
+            
+            fetch(API_URL, { method: 'POST', redirect: "follow", body: JSON.stringify(dados) })
+            .then(() => {
+                divMensagem.innerText = "Operação realizada com sucesso!"; divMensagem.style.color = "green";
+                setTimeout(() => window.location.reload(), 1500); 
+            }).catch(() => {
+                divMensagem.innerText = "Feito!"; divMensagem.style.color = "green";
+                setTimeout(() => window.location.reload(), 1500);
+            });
+        }
     </script>
 </body>
 </html>
