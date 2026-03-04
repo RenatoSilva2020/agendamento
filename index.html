@@ -100,7 +100,7 @@
             <div id="login-input-view">
                 <p class="subtitulo">Digite sua matrícula para continuar</p>
                 <label class="label-pequena">Matrícula (MASP)</label>
-                <input type="text" id="masp-input" class="input-text" placeholder="Ex: 1234567" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                <input type="text" inputmode="numeric" pattern="[0-9]*" id="masp-input" class="input-text" placeholder="Ex: 1234567" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 <button class="btn-roxo" onclick="fazerLogin()">Acessar Sistema <span>→</span></button>
                 <div id="login-erro" style="color: var(--danger); margin-top: 15px; font-size: 14px; font-weight: 500;"></div>
             </div>
@@ -180,7 +180,7 @@
     
     <script>
         // ======= COLOQUE AQUI SUA NOVA URL DO APPS SCRIPT =======
-        const API_URL = "SUA_NOVA_URL_AQUI"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbx9fjGLM7jHdY2IwYg5rSOjgctmbcYfAoOMRzOl55LOmYLPOoOk44r6b0vF4mr_GTGFJg/exec"; 
         // ========================================================
         
         let dadosIniciais = {};
@@ -212,15 +212,26 @@
             setupButtonGroup('grupo-turno');
         });
 
+        // AQUI ESTÁ A ATUALIZAÇÃO DA LÓGICA DE CARREGAMENTO
         window.onload = function() {
+            if (API_URL === "SUA_NOVA_URL_AQUI") {
+                document.getElementById('loading').innerHTML = `
+                    <p style="color: var(--danger); font-weight: bold; text-align: center;">Erro de Configuração</p>
+                    <p style="font-size: 13px; color: var(--text-muted); text-align: center;">Você esqueceu de colar a URL do Google Apps Script na linha 154 do código HTML.</p>`;
+                return;
+            }
+
             fetch(`${API_URL}?_t=${new Date().getTime()}`, { redirect: "follow" })
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) throw new Error("Falha na rede ao tentar acessar a URL.");
+                    return res.json();
+                })
                 .then(dados => {
                     dadosIniciais = dados; 
                     document.getElementById('loading').classList.add('hidden');
                     
                     const maspSalvo = localStorage.getItem('biblio_masp');
-                    if (maspSalvo && dadosIniciais.professores.find(p => p.masp === maspSalvo)) {
+                    if (maspSalvo && dadosIniciais.professores && dadosIniciais.professores.find(p => p.masp === maspSalvo)) {
                         usuarioLogado = dadosIniciais.professores.find(p => p.masp === maspSalvo);
                         document.getElementById('nome-boas-vindas').innerText = obterNomeCurto(usuarioLogado.nome);
                         document.getElementById('tela-login').classList.remove('hidden');
@@ -229,11 +240,24 @@
                     } else {
                         document.getElementById('tela-login').classList.remove('hidden');
                     }
+                })
+                .catch(erro => {
+                    // SE ALGO DER ERRADO (SEM INTERNET, URL QUEBRADA, ETC), ELE VAI MOSTRAR ISSO:
+                    console.error("Erro no carregamento:", erro);
+                    document.getElementById('loading').innerHTML = `
+                        <p style="color: var(--danger); font-weight: bold; text-align: center; margin-bottom: 5px;">Não foi possível conectar.</p>
+                        <p style="font-size: 13px; color: var(--text-muted); text-align: center;">Verifique sua internet ou se o Web App do Google foi implantado para "Qualquer pessoa".</p>
+                        <button class="btn-roxo" style="margin-top: 15px; padding: 10px;" onclick="location.reload()">Tentar Novamente</button>
+                    `;
                 });
         };
 
         function fazerLogin() {
             const maspDigitado = document.getElementById('masp-input').value.trim();
+            if (!dadosIniciais.professores) {
+                document.getElementById('login-erro').innerText = "Erro ao carregar lista de professores. Tente recarregar a página.";
+                return;
+            }
             const prof = dadosIniciais.professores.find(p => p.masp === maspDigitado);
             if (prof) {
                 usuarioLogado = prof;
@@ -280,7 +304,11 @@
             }
 
             document.getElementById('tela-selecao').classList.add('hidden');
-            document.getElementById('loading').classList.remove('hidden'); 
+            
+            // Restaura a visualização do loading padrão para essa transição
+            const divLoading = document.getElementById('loading');
+            divLoading.innerHTML = `<img src="https://i.ibb.co/JFKTr9sc/logo.png" alt="Logo"><p>Carregando agenda...</p>`;
+            divLoading.classList.remove('hidden'); 
 
             fetch(`${API_URL}?action=getReservas&sheetName=${encodeURIComponent(nomeGuiaPlanilha)}&_t=${new Date().getTime()}`, { 
                 method: 'GET',
@@ -291,6 +319,12 @@
             .then(dados => {
                 reservasAtuais = dados.reservas || {};
                 iniciarAppCalendario();
+            })
+            .catch(erro => {
+                divLoading.innerHTML = `
+                    <p style="color: var(--danger); font-weight: bold;">Erro ao carregar agenda.</p>
+                    <button class="btn-roxo" style="margin-top: 15px; padding: 10px;" onclick="voltarParaSelecao()">Voltar</button>
+                `;
             });
         }
 
