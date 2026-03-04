@@ -55,10 +55,14 @@
 
         /* App */
         .user-header { display: flex; flex-direction: column; background: #eff6ff; padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #bfdbfe; position: relative;}
-        .user-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px;}
+        .user-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px;}
         .ambiente-badge { display: inline-block; background: var(--primary); color: white; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; width: fit-content;}
-        .btn-sair { background: none; border: none; color: var(--danger); font-weight: 600; cursor: pointer; padding: 0; font-size: 13px; }
-        .btn-voltar { background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; font-size: 13px; text-decoration: underline; margin-top: 5px; text-align: left; padding: 0;}
+        
+        /* Novos Botões de Cabeçalho */
+        .btn-sair { background: #fee2e2; border: 1px solid #fca5a5; color: #b91c1c; font-weight: 600; cursor: pointer; padding: 6px 14px; font-size: 12px; border-radius: 8px; transition: 0.2s;}
+        .btn-sair:hover { background: #fecaca; }
+        .btn-novo-agendamento { background: white; border: 1px solid #cbd5e1; color: var(--text-dark); font-weight: 600; cursor: pointer; font-size: 13px; padding: 10px 12px; border-radius: 8px; margin-top: 12px; text-align: center; width: 100%; transition: 0.2s; box-sizing: border-box;}
+        .btn-novo-agendamento:hover { background: #f8fafc; border-color: #94a3b8;}
 
         .passo-titulo { font-weight: 700; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; font-size: 16px; }
         
@@ -143,7 +147,7 @@
                     <button class="btn-sair" onclick="fazerLogout()">Sair</button>
                 </div>
                 <div id="badge-ambiente" class="ambiente-badge">BIBLIOTECA - MANHÃ</div>
-                <button class="btn-voltar" onclick="voltarParaSelecao()">← Trocar espaço/turno</button>
+                <button class="btn-novo-agendamento" onclick="voltarParaSelecao()">Novo Agendamento</button>
             </div>
 
             <div class="passo-titulo">1. Escolha a data</div>
@@ -161,8 +165,6 @@
 
             <form id="formAgendamento" class="hidden">
                 <div class="passo-titulo">3. Detalhes da Reserva</div>
-                <label class="label-pequena">Disciplina:</label>
-                <input type="text" id="disciplina" class="input-text" required>
                 <label class="label-pequena">Turma:</label>
                 <select id="turma" class="input-select" required><option value="">Selecione...</option></select>
                 <button type="submit" class="btn-principal" id="btnAgendar">Confirmar Agendamento</button>
@@ -289,6 +291,10 @@
             document.getElementById('app-container').classList.remove('hidden');
             document.getElementById('nome-usuario-logado').innerText = obterNomeCurto(usuarioLogado.nome);
             document.getElementById('badge-ambiente').innerText = nomeGuiaPlanilha;
+            
+            // Garante que ao voltar pro calendário (ou após agendar) as seções de baixo somem
+            document.getElementById('sessao-horarios').classList.add('hidden');
+            document.getElementById('formAgendamento').classList.add('hidden');
 
             if(flatpickrInst) flatpickrInst.destroy(); 
             
@@ -330,7 +336,8 @@
                     div.querySelector('input').addEventListener('change', verificarSelecao);
                 } else if (slot.id && slot.prof.includes(usuarioLogado.nome)) { 
                     div.className = 'slot-card meu-agendamento';
-                    div.innerHTML = `<div class="slot-info"><span class="slot-title">${horarioNum}º Horário</span><span class="slot-desc">Sua reserva: ${slot.disciplina}</span></div><button class="btn-cancelar" onclick="cancelar('${slot.id}')">Cancelar</button>`;
+                    // Disciplina substituída por Turma na visualização da reserva dele
+                    div.innerHTML = `<div class="slot-info"><span class="slot-title">${horarioNum}º Horário</span><span class="slot-desc">Sua reserva: ${slot.turma}</span></div><button class="btn-cancelar" onclick="cancelar('${slot.id}')">Cancelar</button>`;
                 } else {
                     div.className = 'slot-card ocupado';
                     div.innerHTML = `<div class="slot-info"><span class="slot-title">${horarioNum}º Horário</span><span class="slot-desc">${slot.prof}</span></div><span style="font-size: 16px; opacity: 0.5;">🔒</span>`;
@@ -345,13 +352,14 @@
             else document.getElementById('formAgendamento').classList.add('hidden');
         }
 
-        // 5. ENVIAR E CANCELAR (ATUALIZADO PARA MOSTRAR ERROS REAIS)
+        // 5. ENVIAR E CANCELAR
         document.getElementById('formAgendamento').addEventListener('submit', function(e) {
             e.preventDefault();
             let m = Array.from(document.querySelectorAll('input.chk-horario:checked')).map(cb => parseInt(cb.value));
             enviarParaPlanilha({
+                // Disciplina removida do envio de dados
                 sheetName: nomeGuiaPlanilha, action: 'agendar', data: dataSelecionadaStr, nome: usuarioLogado.nome,
-                disciplina: document.getElementById('disciplina').value, turma: document.getElementById('turma').value,
+                turma: document.getElementById('turma').value,
                 h1: m.includes(1), h2: m.includes(2), h3: m.includes(3), h4: m.includes(4), h5: m.includes(5), h6: m.includes(6)
             }, "Registrando agendamento...");
         });
@@ -380,7 +388,7 @@
                     divMensagem.style.color = "var(--success)";
                     setTimeout(() => {
                         divMensagem.innerText = "";
-                        acessarAgenda(); 
+                        acessarAgenda(); // Como agora a função iniciarAppCalendario oculta as divs debaixo, ao rodar isso só o calendário ficará na tela!
                     }, 1500); 
                 } else {
                     throw new Error("Falha no servidor do Google");
