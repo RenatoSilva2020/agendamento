@@ -434,7 +434,7 @@
         }
 
         // =========================================================
-        // IMPLEMENTAÇÃO DO BOTÃO VOLTAR FÍSICO COM REDIRECIONAMENTO
+        // IMPLEMENTAÇÃO ATUALIZADA DO BOTÃO VOLTAR
         // =========================================================
 
         history.replaceState({ tela: 'fechar' }, '', '');
@@ -442,11 +442,24 @@
 
         window.addEventListener('popstate', function(e) {
             if (!e.state || e.state.tela === 'fechar') {
+                
+                // 1. Descobre qual tela está ativa na interface
+                let telaAtiva = 'login';
+                if (!document.getElementById('tela-selecao').classList.contains('hidden')) {
+                    telaAtiva = 'selecao';
+                } else if (!document.getElementById('app-container').classList.contains('hidden')) {
+                    telaAtiva = 'agenda';
+                }
+
+                // 2. Imediatamente devolve essa tela para o histórico (prende o usuário aqui)
+                history.pushState({ tela: telaAtiva }, '', '#' + telaAtiva);
+
+                // 3. Mostra a confirmação de saída
                 if (confirm("Deseja realmente sair do sistema?")) {
                     window.location.href = "https://professorrsilva.my.canva.site/eemp26";
                 } else {
-                    history.pushState({ tela: 'login' }, '', '#login'); 
-                    exibirTelaPorHistorico('login');
+                    // 4. Se ele cancelar (botão ou voltar do celular), garantimos a interface intacta
+                    exibirTelaPorHistorico(telaAtiva);
                 }
                 return;
             }
