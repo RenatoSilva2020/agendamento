@@ -10,7 +10,6 @@
     
     <style>
         :root {
-            /* Cores Gerais */
             --bg-body: #f4f7fb; --text-dark: #1e293b; --text-muted: #64748b; --border: #e2e8f0;
             --primary: #2563eb; --primary-hover: #1d4ed8; --success: #10b981; --danger: #ef4444;
             --roxo-btn: #7c3aed; --roxo-btn-hover: #6d28d9; --verde-btn: #059669; --verde-btn-hover: #047857;
@@ -19,27 +18,23 @@
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-dark); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; margin: 0; }
         .card { background: white; padding: 40px 35px; border-radius: 24px; box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08); width: 100%; max-width: 500px; box-sizing: border-box; }
         
-        /* Utilitários */
         .hidden { display: none !important; }
         .text-center { text-align: center; }
         
-        /* Botões e Inputs Básicos */
-        .btn-roxo { width: 100%; padding: 16px; background: linear-gradient(135deg, #8b5cf6, var(--roxo-btn)); color: white; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .btn-roxo { width: 100%; padding: 16px; background: linear-gradient(135deg, #8b5cf6, var(--roxo-btn)); color: white; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; }
         .btn-roxo:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3); }
-        .btn-verde { width: 100%; padding: 16px; background-color: var(--verde-btn); color: white; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; transition: transform 0.2s; }
+        .btn-verde { width: 100%; padding: 16px; background-color: var(--verde-btn); color: white; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; }
         .btn-verde:hover { background-color: var(--verde-btn-hover); transform: translateY(-2px); }
         .btn-principal { width: 100%; padding: 14px; background-color: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: 600; margin-top: 10px; }
         .btn-principal:hover { background-color: var(--primary-hover); }
         .input-text, .input-select { width: 100%; padding: 16px; font-size: 15px; border: 1px solid var(--border); border-radius: 14px; color: var(--text-dark); background-color: #fafafa; box-sizing: border-box; margin-bottom: 20px;}
         .input-text:focus, .input-select:focus { outline: none; border-color: var(--roxo-btn); background-color: white; box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
         
-        /* Telas de Login/Seleção */
         .logo { max-width: 80px; display: block; margin: 0 auto 20px auto; }
         .titulo-login { font-size: 28px; font-weight: 700; margin: 0 0 8px 0; }
         .subtitulo { color: var(--text-muted); font-size: 15px; margin-bottom: 30px; }
         .label-pequena { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; text-align: left;}
         
-        /* Customizações de Título e Label */
         .texto-preto-destaque { color: #000; font-size: 16px; font-weight: 500; margin-bottom: 25px; }
         .label-negrito { color: #000; font-weight: 800; font-size: 13px; margin-bottom: 10px; }
 
@@ -47,13 +42,11 @@
         .nome-destaque { color: var(--verde-btn); font-size: 22px; font-weight: 700; margin: 5px 0 20px 0; text-transform: uppercase; }
         .link-trocar { display: inline-block; margin-top: 20px; color: #64748b; font-size: 14px; text-decoration: underline; cursor: pointer; }
 
-        /* Botões de Opção */
         .btn-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
         .btn-option { padding: 16px; border: 2px solid var(--border); border-radius: 14px; background: white; color: var(--text-dark); font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; text-align: left; box-sizing: border-box; width: 100%;}
         .btn-option:hover { border-color: #cbd5e1; background: #f8fafc; }
         .btn-option.active { border-color: var(--roxo-btn); background: #f5f3ff; color: var(--roxo-btn); font-weight: 600; box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1); }
 
-        /* App */
         .user-header { display: flex; flex-direction: column; background: #eff6ff; padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #bfdbfe; position: relative;}
         .user-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px;}
         .ambiente-badge { display: inline-block; background: var(--primary); color: white; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; width: fit-content;}
@@ -84,7 +77,6 @@
         input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--success); cursor: pointer; }
         .btn-cancelar { background: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
         
-        /* Tela de Carregamento Padrão */
         .tela-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; }
         .tela-loading img { max-width: 70px; margin-bottom: 15px; animation: pulse 2s infinite; }
         .tela-loading p { font-weight: 600; color: var(--text-muted); font-size: 15px; margin: 0; }
@@ -187,7 +179,7 @@
     
     <script>
         // ======= COLOQUE AQUI SUA NOVA URL DO APPS SCRIPT =======
-        const API_URL = "https://script.google.com/macros/s/AKfycbzZihje5_Nly5ygS_W6B4cvwkcQYz8HCzCx6Ca7G-LO9C8crHcJzRpZbM8m3bFmaBBmbw/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbzubY34bIJiJ7Y22zOK8eo-3O0tduASyjZiI1lCrl4WyIqGlSyVMKeQCeLHVoIg-KctHw/exec"; 
         // ========================================================
         
         let dadosIniciais = {};
@@ -219,13 +211,11 @@
             setupButtonGroup('grupo-turno');
         });
 
-        // 1. CARREGAMENTO INICIAL COM ANTI-CACHE (+ nova data pro servidor forçar atualização)
         window.onload = function() {
             fetch(`${API_URL}?_t=${new Date().getTime()}`, { redirect: "follow" })
                 .then(res => res.json())
                 .then(dados => {
                     dadosIniciais = dados; 
-
                     document.getElementById('loading').classList.add('hidden');
                     
                     const maspSalvo = localStorage.getItem('biblio_masp');
@@ -241,7 +231,6 @@
                 });
         };
 
-        // 2. LOGIN E NAVEGAÇÃO
         function fazerLogin() {
             const maspDigitado = document.getElementById('masp-input').value.trim();
             const prof = dadosIniciais.professores.find(p => p.masp === maspDigitado);
@@ -272,7 +261,6 @@
         function trocarUsuario() { localStorage.removeItem('biblio_masp'); location.reload(); }
         function fazerLogout() { trocarUsuario(); }
 
-        // 3. CARREGAR A AGENDA ESPECÍFICA (AGORA COM ANTI-CACHE)
         function acessarAgenda() {
             ambienteSelecionado = document.querySelector('#grupo-ambiente .btn-option.active').dataset.value;
             turnoSelecionado = document.querySelector('#grupo-turno .btn-option.active').dataset.value;
@@ -293,7 +281,6 @@
             document.getElementById('tela-selecao').classList.add('hidden');
             document.getElementById('loading').classList.remove('hidden'); 
 
-            // Link com &t= anti-cache forçado
             fetch(`${API_URL}?action=getReservas&sheetName=${encodeURIComponent(nomeGuiaPlanilha)}&_t=${new Date().getTime()}`, { 
                 method: 'GET',
                 cache: 'no-store',
@@ -321,7 +308,8 @@
                 locale: "pt", inline: true, dateFormat: "d/m/Y", minDate: "today",
                 disable: [ function(date) { return (date.getDay() === 0 || date.getDay() === 6); } ],
                 onDayCreate: function(dObj, dStr, fp, dayElem) {
-                    let dFmt = String(dayElem.dateObj.getDate()).padStart(2, '0') + '/' + String(dayElem.dateObj.getMonth() + 1).padStart(2, '0') + '/' + dayElem.dateObj.getFullYear();
+                    // Aqui usamos a formatação do próprio motor do calendário para bater idêntico com o JS
+                    let dFmt = fp.formatDate(dayElem.dateObj, "d/m/Y");
                     
                     if (reservasAtuais[dFmt]) {
                         let ocupados = reservasAtuais[dFmt].filter(v => v !== null).length;
@@ -337,7 +325,6 @@
             });
         }
 
-        // 4. LÓGICA DE HORÁRIOS
         function gerarListaHorarios(dataStr) {
             const wrapper = document.getElementById('horarios-wrapper');
             wrapper.innerHTML = ''; 
@@ -353,7 +340,9 @@
                     div.innerHTML = `<div class="slot-info"><span class="slot-title">${horarioNum}º Horário</span><span class="slot-desc" style="color:var(--success)">Disponível</span></div><input type="checkbox" class="chk-horario" value="${horarioNum}">`;
                     div.onclick = function(e) { if(e.target.tagName !== 'INPUT') { let c=this.querySelector('input'); c.checked=!c.checked; verificarSelecao(); }};
                     div.querySelector('input').addEventListener('change', verificarSelecao);
-                } else if (slot.id && slot.prof.includes(usuarioLogado.nome)) { 
+                } 
+                // Usando trim() e comparando o nome diretamente como foi salvo na planilha
+                else if (slot.id && slot.prof.trim() === usuarioLogado.nome.trim()) { 
                     div.className = 'slot-card meu-agendamento';
                     div.innerHTML = `<div class="slot-info"><span class="slot-title">${horarioNum}º Horário</span><span class="slot-desc">Sua reserva: ${slot.turma}</span></div><button class="btn-cancelar" onclick="cancelar('${slot.id}')">Cancelar</button>`;
                 } else {
@@ -370,7 +359,6 @@
             else document.getElementById('formAgendamento').classList.add('hidden');
         }
 
-        // 5. ENVIAR E CANCELAR INTELIGENTE (ATUALIZA A TELA SEM RECARREGAR)
         document.getElementById('formAgendamento').addEventListener('submit', function(e) {
             e.preventDefault();
             let m = Array.from(document.querySelectorAll('input.chk-horario:checked')).map(cb => parseInt(cb.value));
@@ -403,31 +391,22 @@
                 if(retorno && retorno.sucesso) {
                     divMensagem.innerText = "Sucesso!"; 
                     divMensagem.style.color = "var(--success)";
-                    
                     document.getElementById('btn-novo-agendamento').classList.remove('hidden');
 
-                    // Recebe as reservas do POST e atualiza o calendário na mesma hora
-                    if(retorno.reservas) {
-                        reservasAtuais = retorno.reservas;
-                    }
+                    if(retorno.reservas) reservasAtuais = retorno.reservas;
 
                     setTimeout(() => {
                         divMensagem.innerText = "";
                         iniciarAppCalendario(); 
-                        
-                        // Refaz a lista de horários do dia selecionado automaticamente!
-                        if(dataSelecionadaStr) {
-                            flatpickrInst.setDate(dataSelecionadaStr, true);
-                        }
+                        if(dataSelecionadaStr) flatpickrInst.setDate(dataSelecionadaStr, true);
                     }, 1500); 
                 } else {
-                    throw new Error("Falha no servidor do Google");
+                    throw new Error("Falha no servidor");
                 }
             })
             .catch(erro => {
-                divMensagem.innerText = "Erro ao salvar! Ocorreu um erro no acesso à Planilha do Google."; 
+                divMensagem.innerText = "Erro ao salvar!"; 
                 divMensagem.style.color = "var(--danger)";
-                console.error("Erro no fetch:", erro);
             });
         }
     </script>
