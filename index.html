@@ -58,11 +58,11 @@
         .user-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px;}
         .ambiente-badge { display: inline-block; background: var(--primary); color: white; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; width: fit-content;}
         
-        /* Novos Botões de Cabeçalho */
         .btn-sair { background: #fee2e2; border: 1px solid #fca5a5; color: #b91c1c; font-weight: 600; cursor: pointer; padding: 6px 14px; font-size: 12px; border-radius: 8px; transition: 0.2s;}
         .btn-sair:hover { background: #fecaca; }
-        .btn-novo-agendamento { background: white; border: 1px solid #cbd5e1; color: var(--text-dark); font-weight: 600; cursor: pointer; font-size: 13px; padding: 10px 12px; border-radius: 8px; margin-top: 12px; text-align: center; width: 100%; transition: 0.2s; box-sizing: border-box;}
-        .btn-novo-agendamento:hover { background: #f8fafc; border-color: #94a3b8;}
+        /* O botão verde de Novo Agendamento */
+        .btn-novo-agendamento { background: var(--success); color: white; border: none; font-weight: 600; cursor: pointer; font-size: 14px; padding: 12px; border-radius: 10px; margin-top: 12px; text-align: center; width: 100%; transition: 0.2s; box-sizing: border-box;}
+        .btn-novo-agendamento:hover { background: #059669; }
 
         .passo-titulo { font-weight: 700; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; font-size: 16px; }
         
@@ -84,14 +84,21 @@
         .slot-desc { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
         input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--success); cursor: pointer; }
         .btn-cancelar { background: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+        
+        /* Nova Tela de Carregamento Padrão */
+        .tela-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; }
+        .tela-loading img { max-width: 70px; margin-bottom: 15px; animation: pulse 2s infinite; }
+        .tela-loading p { font-weight: 600; color: var(--text-muted); font-size: 15px; margin: 0; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div class="card text-center">
         
-        <div id="loading" style="font-weight: 500; color: var(--text-muted); margin-top: 10px;">
-            ⏳ Atualizando dados do Sistema...
+        <div id="loading" class="tela-loading">
+            <img src="https://i.ibb.co/JFKTr9sc/logo.png" alt="Logo">
+            <p>Carregando...</p>
         </div>
 
         <div id="tela-login" class="hidden">
@@ -139,7 +146,9 @@
         </div>
 
         <div id="app-container" class="hidden" style="text-align: left;">
-            <img src="https://i.ibb.co/JFKTr9sc/logo.png" alt="Logo" class="logo" style="margin-bottom: 20px; max-width: 60px;">
+            <div class="text-center">
+                <img src="https://i.ibb.co/JFKTr9sc/logo.png" alt="Logo" class="logo" style="margin-bottom: 20px; max-width: 60px;">
+            </div>
             
             <div class="user-header">
                 <div class="user-header-top">
@@ -147,7 +156,7 @@
                     <button class="btn-sair" onclick="fazerLogout()">Sair</button>
                 </div>
                 <div id="badge-ambiente" class="ambiente-badge">BIBLIOTECA - MANHÃ</div>
-                <button class="btn-novo-agendamento" onclick="voltarParaSelecao()">Novo Agendamento</button>
+                <button id="btn-novo-agendamento" class="btn-novo-agendamento hidden" onclick="voltarParaSelecao()">Novo Agendamento</button>
             </div>
 
             <div class="passo-titulo">1. Escolha a data</div>
@@ -212,14 +221,12 @@
             setupButtonGroup('grupo-turno');
         });
 
-        // 1. CARREGAMENTO INICIAL (Profs e Turmas)
+        // 1. CARREGAMENTO INICIAL
         window.onload = function() {
             fetch(API_URL, { redirect: "follow" })
                 .then(res => res.json())
                 .then(dados => {
-                    dadosIniciais = dados;
-                    let selTurma = document.getElementById('turma');
-                    dados.turmas.forEach(t => selTurma.add(new Option(t, t)));
+                    dadosIniciais = dados; // Salva todas as turmas e turnos na memória
 
                     document.getElementById('loading').classList.add('hidden');
                     
@@ -260,13 +267,14 @@
             document.getElementById('tela-selecao').classList.remove('hidden');
             document.getElementById('sessao-horarios').classList.add('hidden');
             document.getElementById('formAgendamento').classList.add('hidden');
+            document.getElementById('btn-novo-agendamento').classList.add('hidden'); // Esconde o botão ao voltar
             if(flatpickrInst) flatpickrInst.clear();
         }
 
         function trocarUsuario() { localStorage.removeItem('biblio_masp'); location.reload(); }
         function fazerLogout() { trocarUsuario(); }
 
-        // 3. CARREGAR A AGENDA ESPECÍFICA
+        // 3. CARREGAR A AGENDA ESPECÍFICA E FILTRAR TURMAS
         function acessarAgenda() {
             ambienteSelecionado = document.querySelector('#grupo-ambiente .btn-option.active').dataset.value;
             turnoSelecionado = document.querySelector('#grupo-turno .btn-option.active').dataset.value;
@@ -274,9 +282,19 @@
             nomeGuiaPlanilha = `${ambienteSelecionado} - ${turnoSelecionado} (SEDE)`;
             limiteHorarios = (turnoSelecionado === "NOITE") ? 4 : 6;
 
+            // Filtra as turmas do select baseadas no turno selecionado
+            let selTurma = document.getElementById('turma');
+            selTurma.innerHTML = '<option value="">Selecione...</option>'; // Limpa as opções anteriores
+            if (dadosIniciais.turmas) {
+                dadosIniciais.turmas.forEach(t => {
+                    if(t.turno === turnoSelecionado.toUpperCase()) {
+                        selTurma.add(new Option(t.nome, t.nome));
+                    }
+                });
+            }
+
             document.getElementById('tela-selecao').classList.add('hidden');
-            document.getElementById('loading').innerText = `Carregando ${ambienteSelecionado}...`;
-            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('loading').classList.remove('hidden'); // Mostra a nova tela limpa
 
             fetch(`${API_URL}?action=getReservas&sheetName=${encodeURIComponent(nomeGuiaPlanilha)}`, { redirect: "follow" })
                 .then(res => res.json())
@@ -292,7 +310,6 @@
             document.getElementById('nome-usuario-logado').innerText = obterNomeCurto(usuarioLogado.nome);
             document.getElementById('badge-ambiente').innerText = nomeGuiaPlanilha;
             
-            // Garante que ao voltar pro calendário (ou após agendar) as seções de baixo somem
             document.getElementById('sessao-horarios').classList.add('hidden');
             document.getElementById('formAgendamento').classList.add('hidden');
 
@@ -336,7 +353,6 @@
                     div.querySelector('input').addEventListener('change', verificarSelecao);
                 } else if (slot.id && slot.prof.includes(usuarioLogado.nome)) { 
                     div.className = 'slot-card meu-agendamento';
-                    // Disciplina substituída por Turma na visualização da reserva dele
                     div.innerHTML = `<div class="slot-info"><span class="slot-title">${horarioNum}º Horário</span><span class="slot-desc">Sua reserva: ${slot.turma}</span></div><button class="btn-cancelar" onclick="cancelar('${slot.id}')">Cancelar</button>`;
                 } else {
                     div.className = 'slot-card ocupado';
@@ -357,7 +373,6 @@
             e.preventDefault();
             let m = Array.from(document.querySelectorAll('input.chk-horario:checked')).map(cb => parseInt(cb.value));
             enviarParaPlanilha({
-                // Disciplina removida do envio de dados
                 sheetName: nomeGuiaPlanilha, action: 'agendar', data: dataSelecionadaStr, nome: usuarioLogado.nome,
                 turma: document.getElementById('turma').value,
                 h1: m.includes(1), h2: m.includes(2), h3: m.includes(3), h4: m.includes(4), h5: m.includes(5), h6: m.includes(6)
@@ -386,9 +401,13 @@
                 if(retorno && retorno.sucesso) {
                     divMensagem.innerText = "Sucesso!"; 
                     divMensagem.style.color = "var(--success)";
+                    
+                    // Exibe o botão de "Novo Agendamento" em verde no topo!
+                    document.getElementById('btn-novo-agendamento').classList.remove('hidden');
+
                     setTimeout(() => {
                         divMensagem.innerText = "";
-                        acessarAgenda(); // Como agora a função iniciarAppCalendario oculta as divs debaixo, ao rodar isso só o calendário ficará na tela!
+                        acessarAgenda(); 
                     }, 1500); 
                 } else {
                     throw new Error("Falha no servidor do Google");
