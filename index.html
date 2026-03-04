@@ -162,11 +162,11 @@
             <h2 class="titulo-login">e-Escolar</h2>
 
             <div id="login-input-view">
-                <p class="subtitulo-login">Digite sua matrícula para continuar</p>
+                <p class="subtitulo-login">Digite seu MASP para continuar</p>
                 
                 <div class="grupo-input">
-                    <label for="masp-input">Matrícula</label>
-                    <input type="text" id="masp-input" placeholder="Ex: 123456-7" autocomplete="off">
+                    <label for="masp-input">MASP</label>
+                    <input type="text" id="masp-input" placeholder="Ex: 1234567 (Somente números)" autocomplete="off" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 </div>
 
                 <button class="btn-roxo" onclick="fazerLogin()">
@@ -271,14 +271,12 @@
                     if (maspSalvo) {
                         const profEncontrado = dadosGlobais.professores.find(p => p.masp === maspSalvo);
                         if (profEncontrado) {
-                            usuarioLogado = profEncontrado; // Já deixa preparado
+                            usuarioLogado = profEncontrado;
                             document.getElementById('nome-boas-vindas').innerText = obterNomeCurto(profEncontrado.nome);
                             
-                            // Mostra a tela de Bem Vindo e esconde a de Input
                             document.getElementById('login-input-view').classList.add('hidden');
                             document.getElementById('login-welcome-view').classList.remove('hidden');
                         } else {
-                            // Se o MASP estava salvo mas sumiu da planilha, limpa.
                             localStorage.removeItem('biblio_masp');
                         }
                     }
@@ -287,21 +285,19 @@
                 });
         };
 
-        // Função disparada ao clicar no botão Roxo (Novo Login)
         function fazerLogin() {
             const maspDigitado = document.getElementById('masp-input').value.trim();
-            const profEncontrado = dadosGlobais.professores.find(p => p.masp === maspDigitado);
+            const profEncontrado = dadosGlobais.professores.find(p => String(p.masp).trim() === maspDigitado);
 
             if (profEncontrado) {
                 usuarioLogado = profEncontrado;
                 localStorage.setItem('biblio_masp', profEncontrado.masp);
                 entrarDiretoApp();
             } else {
-                document.getElementById('login-erro').innerText = "Matrícula não encontrada na base de dados.";
+                document.getElementById('login-erro').innerText = "MASP não encontrado na base de dados.";
             }
         }
 
-        // Função disparada ao clicar no botão Verde (Acesso rápido)
         function entrarDiretoApp() {
             document.getElementById('nome-usuario-logado').innerText = obterNomeCurto(usuarioLogado.nome);
             document.getElementById('tela-login').classList.add('hidden');
@@ -309,25 +305,20 @@
             iniciarCalendario();
         }
 
-        // Função disparada ao clicar no link "Trocar de usuário"
         function trocarUsuario() {
             localStorage.removeItem('biblio_masp');
             usuarioLogado = null;
             document.getElementById('masp-input').value = '';
             document.getElementById('login-erro').innerText = '';
             
-            // Troca as visões
             document.getElementById('login-welcome-view').classList.add('hidden');
             document.getElementById('login-input-view').classList.remove('hidden');
         }
 
-        // Função de Sair lá de dentro do App (Header)
         function fazerLogout() {
-            trocarUsuario(); // Limpa dados
-            // Esconde App, mostra tela de login (Visão Input)
+            trocarUsuario(); 
             document.getElementById('app-container').classList.add('hidden');
             document.getElementById('tela-login').classList.remove('hidden');
-            // Como destruímos o calendário e a view, é mais seguro dar reload na página
             location.reload();
         }
 
