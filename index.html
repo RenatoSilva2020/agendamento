@@ -16,7 +16,7 @@
         }
 
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-dark); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; margin: 0; }
-        .card { background: white; padding: 40px 35px; border-radius: 24px; box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08); width: 100%; max-width: 500px; box-sizing: border-box; }
+        .card { background: white; padding: 40px 35px; border-radius: 24px; box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08); width: 100%; max-width: 500px; box-sizing: border-box; position: relative;}
         
         .hidden { display: none !important; }
         .text-center { text-align: center; }
@@ -82,12 +82,34 @@
         .tela-loading img { max-width: 70px; margin-bottom: 15px; animation: pulse 2s infinite; }
         .tela-loading p { font-weight: 600; color: var(--text-muted); font-size: 15px; margin: 0; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+        /* ======== ESTILOS DO NOVO MODAL ======== */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; color: var(--text-dark); }
+        .modal-text { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4; }
+        .modal-buttons { display: flex; gap: 10px; }
+        .btn-modal-cancel { flex: 1; padding: 12px; border-radius: 10px; background: #e2e8f0; color: #334155; font-weight: 600; border: none; cursor: pointer; transition: 0.2s;}
+        .btn-modal-cancel:hover { background: #cbd5e1; }
+        .btn-modal-confirm { flex: 1; padding: 12px; border-radius: 10px; background: var(--danger); color: white; font-weight: 600; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-modal-confirm:hover { background: #dc2626; }
     </style>
 </head>
 <body>
 
     <div class="card text-center">
         
+        <div id="modal-sair" class="modal-overlay hidden">
+            <div class="modal-content">
+                <div class="modal-title">Sair do sistema?</div>
+                <div class="modal-text">Você retornará para a página inicial do e-Escolar.</div>
+                <div class="modal-buttons">
+                    <button class="btn-modal-cancel" onclick="fecharModalSair()">Cancelar</button>
+                    <button class="btn-modal-confirm" onclick="confirmarSair()">Sair</button>
+                </div>
+            </div>
+        </div>
+
         <div id="loading" class="tela-loading">
             <img src="https://i.ibb.co/JFKTr9sc/logo.png" alt="Logo">
             <p>Carregando...</p>
@@ -434,38 +456,45 @@
         }
 
         // =========================================================
-        // IMPLEMENTAÇÃO ATUALIZADA DO BOTÃO VOLTAR
+        // HISTÓRICO DE NAVEGAÇÃO E MODAL DE SAÍDA (BLINDADO)
         // =========================================================
 
         history.replaceState({ tela: 'fechar' }, '', '');
         history.pushState({ tela: 'login' }, '', '#login');
 
         window.addEventListener('popstate', function(e) {
+            
+            // 1. Se o usuário apertar voltar estando na tela inicial (boas-vindas)
             if (!e.state || e.state.tela === 'fechar') {
                 
-                // 1. Descobre qual tela está ativa na interface
-                let telaAtiva = 'login';
-                if (!document.getElementById('tela-selecao').classList.contains('hidden')) {
-                    telaAtiva = 'selecao';
-                } else if (!document.getElementById('app-container').classList.contains('hidden')) {
-                    telaAtiva = 'agenda';
-                }
-
-                // 2. Imediatamente devolve essa tela para o histórico (prende o usuário aqui)
-                history.pushState({ tela: telaAtiva }, '', '#' + telaAtiva);
-
-                // 3. Mostra a confirmação de saída
-                if (confirm("Deseja realmente sair do sistema?")) {
-                    window.location.href = "https://professorrsilva.my.canva.site/eemp26";
-                } else {
-                    // 4. Se ele cancelar (botão ou voltar do celular), garantimos a interface intacta
-                    exibirTelaPorHistorico(telaAtiva);
-                }
+                // Prendemos ele na página adicionando o histórico de novo
+                history.pushState({ tela: 'login' }, '', '#login');
+                history.pushState({ tela: 'modal' }, '', '#sair');
+                
+                // Abre a nossa janelinha (modal) bonita por cima de tudo
+                document.getElementById('modal-sair').classList.remove('hidden');
                 return;
             }
             
-            exibirTelaPorHistorico(e.state.tela);
+            // 2. Garante que o modal desapareça se ele voltar do estado 'modal'
+            document.getElementById('modal-sair').classList.add('hidden');
+            
+            // 3. Exibe a tela correspondente ao passo em que ele está (Agenda, Seleção ou Login)
+            if (e.state && e.state.tela) {
+                exibirTelaPorHistorico(e.state.tela);
+            }
         });
+
+        // Ação do botão "Cancelar" do nosso Modal
+        function fecharModalSair() {
+            // Volta 1 passo no histórico (do #sair para o #login), o que faz o modal fechar sozinho
+            history.back(); 
+        }
+
+        // Ação do botão "Sair" do nosso Modal
+        function confirmarSair() {
+            window.location.href = "https://professorrsilva.my.canva.site/eemp26";
+        }
 
         function exibirTelaPorHistorico(tela) {
             document.getElementById('tela-login').classList.add('hidden');
