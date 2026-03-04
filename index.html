@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Agendamentos</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     
     <style>
@@ -39,6 +39,10 @@
         .subtitulo { color: var(--text-muted); font-size: 15px; margin-bottom: 30px; }
         .label-pequena { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; text-align: left;}
         
+        /* Customizações de Título e Label (Pedidos pelo usuário) */
+        .texto-preto-destaque { color: #000; font-size: 16px; font-weight: 500; margin-bottom: 25px; }
+        .label-negrito { color: #000; font-weight: 800; font-size: 13px; margin-bottom: 10px; }
+
         .circulo-sucesso { width: 64px; height: 64px; background-color: #d1fae5; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px auto; color: #059669; border: 2px solid #a7f3d0; }
         .nome-destaque { color: var(--verde-btn); font-size: 22px; font-weight: 700; margin: 5px 0 20px 0; text-transform: uppercase; }
         .link-trocar { display: inline-block; margin-top: 20px; color: #64748b; font-size: 14px; text-decoration: underline; cursor: pointer; }
@@ -109,21 +113,21 @@
 
         <div id="tela-selecao" class="hidden">
             <img src="https://i.ibb.co/JFKTr9sc/logo.png" alt="Logo" class="logo">
-            <h2 class="titulo-login">Onde vamos?</h2>
-            <p class="subtitulo">Selecione o espaço e o turno que deseja acessar.</p>
+            
+            <p class="texto-preto-destaque">Selecione o espaço e o turno que deseja acessar.</p>
 
-            <label class="label-pequena">Espaço / Laboratório</label>
+            <label class="label-pequena label-negrito">ESPAÇO / LABORATÓRIO</label>
             <div class="btn-group" id="grupo-ambiente">
                 <button class="btn-option active" data-value="BIBLIOTECA">Biblioteca</button>
                 <button class="btn-option" data-value="LAB. INFORMÁTICA">Laboratório de Informática</button>
                 <button class="btn-option" data-value="LAB. CIÊNCIAS">Laboratório de Ciências</button>
             </div>
 
-            <label class="label-pequena">Turno</label>
+            <label class="label-pequena label-negrito">TURNO</label>
             <div class="btn-group" id="grupo-turno">
-                <button class="btn-option active" data-value="MANHÃ">Manhã (6 horários)</button>
-                <button class="btn-option" data-value="TARDE">Tarde (6 horários)</button>
-                <button class="btn-option" data-value="NOITE">Noite (4 horários)</button>
+                <button class="btn-option active" data-value="MANHÃ">Manhã</button>
+                <button class="btn-option" data-value="TARDE">Tarde</button>
+                <button class="btn-option" data-value="NOITE">Noite</button>
             </div>
 
             <button class="btn-roxo" onclick="acessarAgenda()">Abrir Agenda</button>
@@ -265,8 +269,6 @@
             ambienteSelecionado = document.querySelector('#grupo-ambiente .btn-option.active').dataset.value;
             turnoSelecionado = document.querySelector('#grupo-turno .btn-option.active').dataset.value;
             
-            // ATENÇÃO: Verifique se as guias do seu Google Sheets têm exatamente este formato:
-            // "BIBLIOTECA - MANHÃ (SEDE)". Se não tiver "(SEDE)", remova essa parte abaixo:
             nomeGuiaPlanilha = `${ambienteSelecionado} - ${turnoSelecionado} (SEDE)`;
             limiteHorarios = (turnoSelecionado === "NOITE") ? 4 : 6;
 
@@ -369,7 +371,7 @@
                 divMensagem.innerText = "Sucesso!"; divMensagem.style.color = "var(--success)";
                 setTimeout(() => {
                     divMensagem.innerText = "";
-                    acessarAgenda(); // Recarrega os dados da aba atual
+                    acessarAgenda(); 
                 }, 1500); 
             });
         }
